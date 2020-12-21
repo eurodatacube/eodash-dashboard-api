@@ -1,0 +1,15 @@
+flask==1.1.2
+flask_cors==3.0.9
+gunicorn==20.0.4
+python-jose==3.2.0
+prometheus-flask-exporter==0.18.1
+s3fs==0.5.2
+
+pytest==6.1.2
+pytest-watch==4.2.0
+flake8==3.8.4
+moto[s3, server]
+mypy
+black
+ipdb
+requests-mock

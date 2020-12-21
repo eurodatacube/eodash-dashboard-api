@@ -1,0 +1,11 @@
+version: "3.7"
+services:
+    eodash-dashboard-api:
+        build: .
+        ports:
+        - 5000:5000
+        volumes:
+        - .:/srv/service
+        environment: {}
+        #command: python -m flask run --host 0.0.0.0
+        command: gunicorn --bind=0.0.0.0:5000 --workers=3 --threads=1 --log-level=INFO --reload parcel_eo_timeseries:app
