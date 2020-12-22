@@ -34,7 +34,10 @@ jobs:
 
       - name: test and push
         run: |
+          pwd
+          ls -la
           IMG="eurodatacube/eodash-dashboard-api:${{ steps.get_image_tag.outputs.TAG }}"
+          docker run  "${IMG}" date || exit 1
           docker run --env-file test_environment.env "${IMG}" pytest || exit 1
           docker run "${IMG}" flake8 || exit 1
           docker run "${IMG}" mypy . || exit 1
