@@ -1,3 +1,4 @@
+import json
 import http
 import subprocess
 import time
@@ -41,9 +42,7 @@ def s3_bucket() -> str:
 @pytest.fixture(scope="session")
 def s3_directory(s3_bucket):
     s3_dir = PurePath(f"{s3_bucket}/my_dir")
-    with mock.patch(
-        "dashboard_api.config.S3_DIRECTORY", new=s3_dir
-    ):
+    with mock.patch("dashboard_api.config.S3_DIRECTORY", new=s3_dir):
         yield s3_dir
 
 
@@ -83,3 +82,31 @@ def s3(s3_base, s3_endpoint_uri, s3_bucket, s3_directory):
     s3fs.S3FileSystem.clear_instance_cache()
     s3 = s3fs.S3FileSystem(anon=False, client_kwargs={"endpoint_url": s3_endpoint_uri})
     s3.invalidate_cache()
+    return s3
+
+
+@pytest.fixture
+def dashboard_id() -> str:
+    return "2f0f37ba-14bd-4918-8f3c-2e6ce3ab64b1"
+
+
+@pytest.fixture
+def secret_token() -> str:
+    return "f1191322-ee57-4b86-ac72-b68c4d33514b"
+
+
+@pytest.fixture
+def dashboard(s3_directory, dashboard_id, secret_token, s3):
+    dashboard_data = {"a": 5}
+    dashboard_dir = s3_directory / dashboard_id
+    s3.mkdir(dashboard_dir)
+
+    with s3.open(dashboard_dir / "secret_token", "wt") as secret_token_file:
+        secret_token_file.write(secret_token)
+
+    with s3.open(dashboard_dir / "dashboard.json", "w") as dashboard_file:
+        dashboard_file.write(json.dumps(dashboard_data))
+
+    yield
+
+    s3.rm(str(dashboard_dir), recursive=True)

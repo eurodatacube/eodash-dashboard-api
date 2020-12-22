@@ -1,12 +1,16 @@
+import hmac
 import http
 import json
 import logging
+from pathlib import PurePath
+from typing import NewType
 import s3fs
 import time
 import uuid
 
 from flask import Flask, request, g, jsonify
 from prometheus_flask_exporter import PrometheusMetrics
+from werkzeug.exceptions import BadRequest, NotFound
 
 from dashboard_api import config
 
@@ -50,49 +54,75 @@ def log_request(response):
     return response
 
 
+DashboardId = NewType("DashboardId", str)
+
+
+def dashboard_dir(dashboard_id: DashboardId) -> PurePath:
+    return config.S3_DIRECTORY / dashboard_id
+
+
+def dashboard_filepath(dashboard_id: DashboardId) -> PurePath:
+    return dashboard_dir(dashboard_id=dashboard_id) / "dashboard.json"
+
+
+def secret_token_filepath(dashboard_id: DashboardId) -> PurePath:
+    return dashboard_dir(dashboard_id=dashboard_id) / "secret_token"
+
+
 @app.route("/dashboards", methods=["POST"])
 def create_dashboard():
 
     dashboard = request.json
 
-    # NOTE; this is convenient for tests, it will reuse the one from tests
     s3 = s3fs.S3FileSystem.current()
 
-    dashboard_id = str(uuid.uuid4())
+    dashboard_id = DashboardId(str(uuid.uuid4()))
     secret_token = str(uuid.uuid4())
 
-    dashboard_dir = config.S3_DIRECTORY / dashboard_id
+    s3.mkdir(dashboard_dir(dashboard_id))
 
-    s3.mkdir(dashboard_dir)
-
-    with s3.open(dashboard_dir / "secret_token", "wt") as secret_token_file:
+    with s3.open(secret_token_filepath(dashboard_id), "w") as secret_token_file:
         secret_token_file.write(secret_token)
 
-    with s3.open(dashboard_dir / "dashboard.json", "w") as dashboard_file:
+    with s3.open(dashboard_filepath(dashboard_id), "w") as dashboard_file:
         dashboard_file.write(json.dumps(dashboard))
 
-    return (
-        jsonify(
-            {
-                "dashboard_id": dashboard_id,
-                "secret_token": secret_token,
-            }
-        ),
-        http.HTTPStatus.CREATED,
-    )
+    response = {
+        "dashboard_id": dashboard_id,
+        "secret_token": secret_token,
+    }
+    return (jsonify(response), http.HTTPStatus.CREATED)
 
 
 @app.route("/dashboards/<dashboard_id>/<secret_token>", methods=["POST"])
-def update_dashboard(dashboard_id: str, secret_token: str):
+def update_dashboard(dashboard_id: DashboardId, secret_token: str):
     raise 4
 
 
 @app.route("/dashboards/<dashboard_id>", methods=["GET"])
-def get_dashboard(dashboard_id: str):
-    raise 4
+@app.route("/dashboards/<dashboard_id>/<secret_token>", methods=["GET"])
+def get_dashboard(dashboard_id: DashboardId, secret_token=None):
+    """
+    If a secret token is specified, we do validate it to make the user aware of this,
+    but for this operation it is not required
+    """
+    try:
+        if secret_token:
+            validate_token(dashboard_id, secret_token)
+
+        return s3fs.S3FileSystem.current().cat_file(
+            str(dashboard_filepath(dashboard_id)),
+        )
+    except FileNotFoundError:
+        raise NotFound()
 
 
-@app.route("/dashboardsX/<dashboard_id>/<secret_token>", methods=["GET"])
-def get_dashboard_verified(dashboard_id: str, secret_token: str):
-    # TODO: verify secret token and do regular get
-    raise 4
+def validate_token(dashboard_id: DashboardId, secret_token: str) -> None:
+    """
+    Throws FileNotFound and BadRequest
+    """
+    actual_secret = s3fs.S3FileSystem.current().cat_file(
+        str(secret_token_filepath(dashboard_id)),
+    )
+    if not hmac.compare_digest(actual_secret, secret_token.encode()):
+        raise BadRequest("Invalid secret token")
