@@ -81,6 +81,8 @@ def create_dashboard():
     dashboard_id = DashboardId(str(uuid.uuid4()))
     secret_token = str(uuid.uuid4())
 
+    app.logger.info(f"Creating dashboard {dashboard_id}")
+
     s3.mkdir(dashboard_dir(dashboard_id))
     s3.pipe_file(secret_token_filepath(dashboard_id), secret_token)
     s3.pipe_file(dashboard_filepath(dashboard_id), json.dumps(dashboard))
@@ -96,6 +98,7 @@ def create_dashboard():
 def update_dashboard(dashboard_id: DashboardId, secret_token: str):
     # NOTE: it's rather bad practise to have the secret_token in the url, but in the
     #       frontend, it's already shared in the url, so we don't make it much worse
+    app.logger.info(f"Updating dashboard {dashboard_id}")
 
     try:
         validate_token(dashboard_id, secret_token)
@@ -119,6 +122,7 @@ def get_dashboard(dashboard_id: DashboardId, secret_token=None):
     If a secret token is specified, we do validate it to make the user aware of this,
     but for this operation it is not required
     """
+    app.logger.info(f"Retrieving dashboard {dashboard_id}")
     try:
         if secret_token:
             validate_token(dashboard_id, secret_token)
