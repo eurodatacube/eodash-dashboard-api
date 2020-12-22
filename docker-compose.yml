@@ -6,6 +6,7 @@ services:
         - 5000:5000
         volumes:
         - .:/srv/service
-        environment: {}
+        environment:
+            S3_DIRECTORY: ""
         #command: python -m flask run --host 0.0.0.0
-        command: gunicorn --bind=0.0.0.0:5000 --workers=3 --threads=1 --log-level=INFO --reload parcel_eo_timeseries:app
+        command: gunicorn --bind=0.0.0.0:5000 --workers=3 --threads=1 --log-level=INFO --reload dashboard_api:app

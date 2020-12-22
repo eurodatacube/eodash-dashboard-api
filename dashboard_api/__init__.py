@@ -1,8 +1,14 @@
+import http
+import json
 import logging
+import s3fs
 import time
+import uuid
 
-from flask import Flask, request, g
+from flask import Flask, request, g, jsonify
 from prometheus_flask_exporter import PrometheusMetrics
+
+from dashboard_api import config
 
 
 app = Flask(__name__)
@@ -42,3 +48,51 @@ def log_request(response):
             f"status:{response.status}"
         )
     return response
+
+
+@app.route("/dashboards", methods=["POST"])
+def create_dashboard():
+
+    dashboard = request.json
+
+    # NOTE; this is convenient for tests, it will reuse the one from tests
+    s3 = s3fs.S3FileSystem.current()
+
+    dashboard_id = str(uuid.uuid4())
+    secret_token = str(uuid.uuid4())
+
+    dashboard_dir = config.S3_DIRECTORY / dashboard_id
+
+    s3.mkdir(dashboard_dir)
+
+    with s3.open(dashboard_dir / "secret_token", "wt") as secret_token_file:
+        secret_token_file.write(secret_token)
+
+    with s3.open(dashboard_dir / "dashboard.json", "w") as dashboard_file:
+        dashboard_file.write(json.dumps(dashboard))
+
+    return (
+        jsonify(
+            {
+                "dashboard_id": dashboard_id,
+                "secret_token": secret_token,
+            }
+        ),
+        http.HTTPStatus.CREATED,
+    )
+
+
+@app.route("/dashboards/<dashboard_id>/<secret_token>", methods=["POST"])
+def update_dashboard(dashboard_id: str, secret_token: str):
+    raise 4
+
+
+@app.route("/dashboards/<dashboard_id>", methods=["GET"])
+def get_dashboard(dashboard_id: str):
+    raise 4
+
+
+@app.route("/dashboardsX/<dashboard_id>/<secret_token>", methods=["GET"])
+def get_dashboard_verified(dashboard_id: str, secret_token: str):
+    # TODO: verify secret token and do regular get
+    raise 4
