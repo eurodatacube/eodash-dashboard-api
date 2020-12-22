@@ -9,6 +9,7 @@ import time
 import uuid
 
 from flask import Flask, request, g, jsonify
+from flask_cors import CORS
 from prometheus_flask_exporter import PrometheusMetrics
 from werkzeug.exceptions import BadRequest, NotFound
 
@@ -16,6 +17,7 @@ from dashboard_api import config
 
 
 app = Flask(__name__)
+CORS(app)
 metrics = PrometheusMetrics(app)
 
 
