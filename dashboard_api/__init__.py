@@ -80,12 +80,8 @@ def create_dashboard():
     secret_token = str(uuid.uuid4())
 
     s3.mkdir(dashboard_dir(dashboard_id))
-
-    with s3.open(secret_token_filepath(dashboard_id), "w") as secret_token_file:
-        secret_token_file.write(secret_token)
-
-    with s3.open(dashboard_filepath(dashboard_id), "w") as dashboard_file:
-        dashboard_file.write(json.dumps(dashboard))
+    s3.pipe_file(secret_token_filepath(dashboard_id), secret_token)
+    s3.pipe_file(dashboard_filepath(dashboard_id), json.dumps(dashboard))
 
     response = {
         "dashboard_id": dashboard_id,
@@ -96,7 +92,22 @@ def create_dashboard():
 
 @app.route("/dashboards/<dashboard_id>/<secret_token>", methods=["POST"])
 def update_dashboard(dashboard_id: DashboardId, secret_token: str):
-    raise 4
+    # NOTE: it's rather bad practise to have the secret_token in the url, but in the
+    #       frontend, it's already shared in the url, so we don't make it much worse
+
+    try:
+        validate_token(dashboard_id, secret_token)
+    except FileNotFoundError:
+        raise NotFound()
+
+    dashboard = request.json
+
+    s3fs.S3FileSystem.current().pipe_file(
+        dashboard_filepath(dashboard_id),
+        json.dumps(dashboard),
+    )
+
+    return ""
 
 
 @app.route("/dashboards/<dashboard_id>", methods=["GET"])
@@ -110,8 +121,13 @@ def get_dashboard(dashboard_id: DashboardId, secret_token=None):
         if secret_token:
             validate_token(dashboard_id, secret_token)
 
-        return s3fs.S3FileSystem.current().cat_file(
+        content = s3fs.S3FileSystem.current().cat_file(
             str(dashboard_filepath(dashboard_id)),
+        )
+        return app.response_class(
+            content,
+            # file is json already
+            mimetype="application/json",
         )
     except FileNotFoundError:
         raise NotFound()

@@ -107,6 +107,6 @@ def dashboard(s3_directory, dashboard_id, secret_token, s3):
     with s3.open(dashboard_dir / "dashboard.json", "w") as dashboard_file:
         dashboard_file.write(json.dumps(dashboard_data))
 
-    yield
+    yield dashboard_data
 
     s3.rm(str(dashboard_dir), recursive=True)

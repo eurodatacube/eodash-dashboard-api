@@ -24,20 +24,48 @@ def test_create_dashboards_refuses_invalid_json(client):
     response = client.post(
         "/dashboards", content_type="application/json", data="asdfa;'"
     )
-
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
 
-def test_update_dashboard_fails_on_nonexistent_dashboard():
-    raise 4
+def test_update_dashboard_fails_on_nonexistent_dashboard(client):
+    response = client.post("/dashboards/a/b")
+    assert response.status_code == http.HTTPStatus.NOT_FOUND
 
 
-def test_update_dashboard_fails_on_secret_missmatch():
-    raise 4
+def test_update_dashboard_fails_on_secret_missmatch(client, dashboard, dashboard_id):
+    response = client.post(f"/dashboards/{dashboard_id}/invalid")
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
 
-def test_update_dashboard_changes_dashboard():
-    raise 4
+def test_update_dashboards_refuses_invalid_json(
+    client, dashboard_id, dashboard, secret_token
+):
+    response = client.post(
+        f"/dashboards/{dashboard_id}/{secret_token}",
+        content_type="application/json",
+        data="asdfa;'",
+    )
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
+
+def test_update_dashboard_changes_dashboard(
+    client, dashboard_id, dashboard, secret_token, s3_directory
+):
+    new_dashboard = {"a": dashboard["a"] + 1}
+    response = client.post(
+        f"/dashboards/{dashboard_id}/{secret_token}", json=new_dashboard
+    )
+
+    assert response.status_code == http.HTTPStatus.OK
+
+    assert (
+        json.loads(
+            s3fs.S3FileSystem.current().cat_file(
+                str(s3_directory / dashboard_id / "dashboard.json")
+            )
+        )
+        == new_dashboard
+    )
 
 
 def test_get_dashboard_handles_missing(client):
@@ -54,7 +82,7 @@ def test_get_dashboard_returns_dashboard(client, dashboard_id, dashboard):
 def test_get_dashboard_verified_fails_on_secret_missmatch(
     client, dashboard_id, dashboard
 ):
-    response = client.get(f"/dashboards/{dashboard_id}/invalid-one")
+    response = client.get(f"/dashboards/{dashboard_id}/invalid")
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
 
