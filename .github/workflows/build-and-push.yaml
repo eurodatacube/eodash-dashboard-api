@@ -2,8 +2,8 @@ name: Build and push
 
 on:
   push:
-    branches:
-      - master
+    tags:
+      - "*"
 
 jobs:
   build_and_push:
