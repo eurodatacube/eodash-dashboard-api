@@ -1,4 +1,3 @@
-import { randomBytes } from 'crypto';
 import EventEmitter from 'eventemitter3';
 
 import { Dashboard } from '../../domain/dashboard';

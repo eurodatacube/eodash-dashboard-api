@@ -1,6 +1,5 @@
 import { TestInterface } from 'ava';
 
-
 import { Feature } from '../../domain/feature';
 import { DashboardNoKeys } from '../../dto/dashboard-no-keys';
 

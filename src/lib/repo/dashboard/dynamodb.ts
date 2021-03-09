@@ -9,7 +9,6 @@
 // import { dashboardToNoKeysMapper } from '../../mapper/dashboardToNoKeys';
 // import { noKeysToDashboardMapper } from '../../mapper/noKeysToDashboard';
 
-
 // export default class DynamoDBDashboardRepository extends EventEmitter implements DashboardRepository {
 //   constructor(public readonly tableName: string, public readonly keySize: number, private readonly db: DynamoDB, private readonly client: DynamoDB.DocumentClient) {
 //     super();

@@ -5,13 +5,18 @@ import Joi from 'joi';
 import { Server as IOServer, Socket as IOSocket } from 'socket.io';
 import { Logger } from 'winston';
 
-import { Feature, FEATURE_MAX_WIDTH, FEATURE_MIN_WIDTH, FEATURE_WIDTH_STEP } from '../../domain/feature';
+import {
+  Feature,
+  FEATURE_MAX_WIDTH,
+  FEATURE_MIN_WIDTH,
+  FEATURE_WIDTH_STEP,
+} from '../../domain/feature';
 import { DashboardNoKeys } from '../../dto/dashboard-no-keys';
+import { FeatureNoWidth } from '../../dto/feature-no-width';
 import { noKeysToDtoMapper } from '../../mapper/noKeysToDto';
+import { noWidthToFeatureMapper } from '../../mapper/noWidthToFeature';
 import { ConnectionRepository } from '../../repo/connection';
 import { DashboardRepository } from '../../repo/dashboard';
-import { noWidthToFeatureMapper } from '../../mapper/noWidthToFeature';
-import { FeatureNoWidth } from '../../dto/feature-no-width';
 
 export enum ErrorType {
   Validation = 'validation',
@@ -90,7 +95,7 @@ export class DashboardServer<
             features: Joi.array().items(
               Joi.object({
                 id: Joi.number().required(),
-              }).options({allowUnknown: true})
+              }).options({ allowUnknown: true })
             ),
           })
           .validate(payload);
@@ -107,7 +112,13 @@ export class DashboardServer<
         }
         this.logger.debug(`Validation for ${socket.id}'s create successful`);
 
-        this.handleCreate(socket, value.title, value.features.map((noWidth: FeatureNoWidth) => noWidthToFeatureMapper(noWidth)))
+        this.handleCreate(
+          socket,
+          value.title,
+          value.features.map((noWidth: FeatureNoWidth) =>
+            noWidthToFeatureMapper(noWidth)
+          )
+        )
           .then(cb)
           .catch((msg: string) =>
             cb({ error: true, type: ErrorType.Execution, message: msg })
@@ -151,8 +162,9 @@ export class DashboardServer<
 
         // TODO: DDD violation. Move validation to domain.
         const { error, value } = Joi.object({
-            id: Joi.number().required(),
-          }).options({allowUnknown: true})
+          id: Joi.number().required(),
+        })
+          .options({ allowUnknown: true })
           .validate(payload);
 
         if (error) {
@@ -330,7 +342,9 @@ export class DashboardServer<
         );
 
         connections.forEach((connection) => {
-          this.logger.debug(`Emitting edit event to ${connection.id} for dashboard ${id}`)
+          this.logger.debug(
+            `Emitting edit event to ${connection.id} for dashboard ${id}`
+          );
           this.io.to(connection.id).emit('edit', dashboard);
         });
       }
@@ -349,20 +363,19 @@ export class DashboardServer<
       socket.id
     ))!;
 
-    await this.dashboardRepository.edit(
-      dashboardId,
-      async (dashboard) => {
-        const index = dashboard.features.findIndex(feature => feature.id === featureId);
+    await this.dashboardRepository.edit(dashboardId, async (dashboard) => {
+      const index = dashboard.features.findIndex(
+        (feature) => feature.id === featureId
+      );
 
-        if(index !== -1) {
-          if(dashboard.features[index].width < FEATURE_MAX_WIDTH) {
-            dashboard.features[index].width += FEATURE_WIDTH_STEP;
-          }
-        } else throw 'Feature not found';
+      if (index !== -1) {
+        if (dashboard.features[index].width < FEATURE_MAX_WIDTH) {
+          dashboard.features[index].width += FEATURE_WIDTH_STEP;
+        }
+      } else throw 'Feature not found';
 
-        return dashboard;
-      }
-    );
+      return dashboard;
+    });
 
     this.logger.debug(
       `${socket.id} expanded ${featureId} from dashboard ${dashboardId}`
@@ -381,20 +394,19 @@ export class DashboardServer<
       socket.id
     ))!;
 
-    await this.dashboardRepository.edit(
-      dashboardId,
-      async (dashboard) => {
-        const index = dashboard.features.findIndex(feature => feature.id === featureId);
+    await this.dashboardRepository.edit(dashboardId, async (dashboard) => {
+      const index = dashboard.features.findIndex(
+        (feature) => feature.id === featureId
+      );
 
-        if(index !== -1) {
-          if(dashboard.features[index].width > FEATURE_MIN_WIDTH) {
-            dashboard.features[index].width -= FEATURE_WIDTH_STEP;
-          }
-        } else throw 'Feature not found';
+      if (index !== -1) {
+        if (dashboard.features[index].width > FEATURE_MIN_WIDTH) {
+          dashboard.features[index].width -= FEATURE_WIDTH_STEP;
+        }
+      } else throw 'Feature not found';
 
-        return dashboard;
-      }
-    );
+      return dashboard;
+    });
 
     this.logger.debug(
       `${socket.id} shrank ${featureId} from dashboard ${dashboardId}`
@@ -413,18 +425,17 @@ export class DashboardServer<
       socket.id
     ))!;
 
-    await this.dashboardRepository.edit(
-      dashboardId,
-      async (dashboard) => {
-        const index = dashboard.features.findIndex(feature => feature.id === featureId);
-        if(index !== -1 && index !== dashboard.features.length - 1) {
-          const temp = dashboard.features[index];
-          dashboard.features[index] = dashboard.features[index + 1];
-          dashboard.features[index + 1] = temp;
-        }else throw 'Feature not found';
-        return dashboard;
-      }
-    );
+    await this.dashboardRepository.edit(dashboardId, async (dashboard) => {
+      const index = dashboard.features.findIndex(
+        (feature) => feature.id === featureId
+      );
+      if (index !== -1 && index !== dashboard.features.length - 1) {
+        const temp = dashboard.features[index];
+        dashboard.features[index] = dashboard.features[index + 1];
+        dashboard.features[index + 1] = temp;
+      } else throw 'Feature not found';
+      return dashboard;
+    });
 
     this.logger.debug(
       `${socket.id} moved feature ${featureId} from dashboard ${dashboardId} down`
@@ -443,18 +454,17 @@ export class DashboardServer<
       socket.id
     ))!;
 
-    await this.dashboardRepository.edit(
-      dashboardId,
-      async (dashboard) => {
-        const index = dashboard.features.findIndex(feature => feature.id === featureId);
-        if(index > 0) {
-          const temp = dashboard.features[index];
-          dashboard.features[index] = dashboard.features[index - 1];
-          dashboard.features[index - 1] = temp;
-        } else throw 'Feature not found';
-        return dashboard;
-      }
-    );
+    await this.dashboardRepository.edit(dashboardId, async (dashboard) => {
+      const index = dashboard.features.findIndex(
+        (feature) => feature.id === featureId
+      );
+      if (index > 0) {
+        const temp = dashboard.features[index];
+        dashboard.features[index] = dashboard.features[index - 1];
+        dashboard.features[index - 1] = temp;
+      } else throw 'Feature not found';
+      return dashboard;
+    });
 
     this.logger.debug(
       `${socket.id} moved feature ${featureId} from dashboard ${dashboardId} up`
@@ -472,10 +482,10 @@ export class DashboardServer<
 
     const dashboard = await this.dashboardRepository.get(id, editKey);
 
-    
-
     if (!dashboard) {
-      this.logger.debug(`${socket.id} provided incorrect id/editKey combination`);
+      this.logger.debug(
+        `${socket.id} provided incorrect id/editKey combination`
+      );
       throw 'Dashboard with such id and editKey not found';
     }
 
@@ -572,20 +582,14 @@ export class DashboardServer<
       socket.id
     ))!;
 
-    await this.dashboardRepository.edit(
-      dashboardId,
-      async (dashboard) => {
-        const index = dashboard.features.findIndex((f) => f.id === id);
+    await this.dashboardRepository.edit(dashboardId, async (dashboard) => {
+      const index = dashboard.features.findIndex((f) => f.id === id);
 
-        if(index === -1) throw 'Feature not found';
+      if (index === -1) throw 'Feature not found';
 
-        dashboard.features.splice(
-          index,
-          1
-        );
-        return dashboard
-        }
-    );
+      dashboard.features.splice(index, 1);
+      return dashboard;
+    });
 
     this.logger.debug(
       `${socket.id} removed feature with id ${id} from dashboard ${dashboardId}`
@@ -597,12 +601,16 @@ export class DashboardServer<
   }
 
   public start(): Promise<void[]> {
-    return Promise.all([this.connectionRepository.connect(), this.dashboardRepository.connect(), new Promise((resolve) => {
-      this.http.listen(this.port, this.host, () => {
-        this.logger.info(`Server listening on ${this.host}:${this.port}`);
-        resolve();
-      });
-    })]);
+    return Promise.all([
+      this.connectionRepository.connect(),
+      this.dashboardRepository.connect(),
+      new Promise((resolve) => {
+        this.http.listen(this.port, this.host, () => {
+          this.logger.info(`Server listening on ${this.host}:${this.port}`);
+          resolve();
+        });
+      }),
+    ]);
   }
 
   public close(): Promise<void[]> {

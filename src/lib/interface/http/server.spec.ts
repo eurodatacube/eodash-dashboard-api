@@ -4,7 +4,11 @@ import { io, Socket } from 'socket.io-client';
 import * as winston from 'winston';
 
 import { Dashboard } from '../../domain/dashboard';
-import { FEATURE_MAX_WIDTH, FEATURE_MIN_WIDTH, FEATURE_WIDTH_STEP } from '../../domain/feature';
+import {
+  FEATURE_MAX_WIDTH,
+  FEATURE_MIN_WIDTH,
+  FEATURE_WIDTH_STEP,
+} from '../../domain/feature';
 import { DashboardDto } from '../../dto/dashboard';
 import { FeatureNoWidth } from '../../dto/feature-no-width';
 import { MemoryConnectionRepository } from '../../repo/connection/memory';
@@ -316,43 +320,36 @@ test.cb(
   }
 );
 
-test.cb(
-  'Should not be able to remove non-existent feature',
-  (t): void => {
-    t.plan(2);
+test.cb('Should not be able to remove non-existent feature', (t): void => {
+  t.plan(2);
 
-    const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [{id: 1}, { id: 0 }];
+  const title = 'My dashboard';
+  const features: FeatureNoWidth[] = [{ id: 1 }, { id: 0 }];
 
-    t.context.clients[0].emit(
-      'create',
-      {
-        title,
-        features,
-      },
-      (dashboard: Dashboard) => {
-        t.context.clients[1].emit(
-          'listen',
-          {
-            id: dashboard.id,
-            editKey: dashboard.editKey,
-          },
-          () => {
-            t.context.clients[1].emit(
-              'remove-feature',
-              -1,
-              (response: any) => {
-                t.true(response?.error);
-                t.is(response.type, ErrorType.Execution);
-                t.end();
-              }
-            );
-          }
-        );
-      }
-    );
-  }
-);
+  t.context.clients[0].emit(
+    'create',
+    {
+      title,
+      features,
+    },
+    (dashboard: Dashboard) => {
+      t.context.clients[1].emit(
+        'listen',
+        {
+          id: dashboard.id,
+          editKey: dashboard.editKey,
+        },
+        () => {
+          t.context.clients[1].emit('remove-feature', -1, (response: any) => {
+            t.true(response?.error);
+            t.is(response.type, ErrorType.Execution);
+            t.end();
+          });
+        }
+      );
+    }
+  );
+});
 
 test.cb(
   "Should be able to change a dashboard's title as creator",
@@ -626,7 +623,12 @@ test.cb('Should emit correct edit event when a feature is added', (t): void => {
             t.context.clients[1].on('edit', (dashboard: DashboardDto) => {
               t.is(dashboard.features.length, 1);
               t.is(dashboard.features[0].id, newFeature.id);
-              t.true(Object.prototype.hasOwnProperty.call(dashboard.features[0], 'width'));
+              t.true(
+                Object.prototype.hasOwnProperty.call(
+                  dashboard.features[0],
+                  'width'
+                )
+              );
               t.end();
             });
           });
@@ -749,34 +751,26 @@ test.cb(
   }
 );
 
-test.cb(
-  'Should be able to move feature up',
-  (t): void => {
-    t.plan(1);
+test.cb('Should be able to move feature up', (t): void => {
+  t.plan(1);
 
-    const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [{id: 1}, { id: 0 }];
+  const title = 'My dashboard';
+  const features: FeatureNoWidth[] = [{ id: 1 }, { id: 0 }];
 
-    t.context.clients[0].emit(
-      'create',
-      {
-        title,
-        features,
-      },
-      () => {
-
-            t.context.clients[0].emit(
-              'feature-move-up',
-              0,
-              (response: any) => {
-                t.is(response?.error, undefined);
-                t.end();
-              }
-            );
-          }
-        );
-  }
-);
+  t.context.clients[0].emit(
+    'create',
+    {
+      title,
+      features,
+    },
+    () => {
+      t.context.clients[0].emit('feature-move-up', 0, (response: any) => {
+        t.is(response?.error, undefined);
+        t.end();
+      });
+    }
+  );
+});
 
 test.cb(
   'Should not be able to move feature up without editing privilege',
@@ -784,7 +778,7 @@ test.cb(
     t.plan(1);
 
     const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [{id: 1}, { id: 0 }];
+    const features: FeatureNoWidth[] = [{ id: 1 }, { id: 0 }];
 
     t.context.clients[0].emit(
       'create',
@@ -794,16 +788,12 @@ test.cb(
       },
       (dashboard: Dashboard) => {
         t.context.clients[1].emit('listen', { id: dashboard.id }, () => {
-            t.context.clients[1].emit(
-              'feature-move-up',
-              0,
-              (response: any) => {
-                t.true(response?.error);
-                t.end();
-              }
-            );
-          }
-        )}
+          t.context.clients[1].emit('feature-move-up', 0, (response: any) => {
+            t.true(response?.error);
+            t.end();
+          });
+        });
+      }
     );
   }
 );
@@ -814,7 +804,7 @@ test.cb(
     t.plan(2);
 
     const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [{id: 1}, { id: 0 }];
+    const features: FeatureNoWidth[] = [{ id: 1 }, { id: 0 }];
 
     t.context.clients[0].emit(
       'create',
@@ -823,78 +813,58 @@ test.cb(
         features,
       },
       () => {
-
-            t.context.clients[0].emit(
-              'feature-move-up',
-              1,
-              (response: any) => {
-                t.true(response?.error);
-                t.is(response.type, ErrorType.Execution);
-                t.end();
-              }
-            );
-          }
+        t.context.clients[0].emit('feature-move-up', 1, (response: any) => {
+          t.true(response?.error);
+          t.is(response.type, ErrorType.Execution);
+          t.end();
+        });
+      }
     );
   }
 );
 
-test.cb(
-  'Should not be able to move non-existent feature up',
-  (t): void => {
-    t.plan(2);
+test.cb('Should not be able to move non-existent feature up', (t): void => {
+  t.plan(2);
 
-    const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [{id: 1}, { id: 0 }];
+  const title = 'My dashboard';
+  const features: FeatureNoWidth[] = [{ id: 1 }, { id: 0 }];
 
-    t.context.clients[0].emit(
-      'create',
-      {
-        title,
-        features,
-      },
-      () => {
+  t.context.clients[0].emit(
+    'create',
+    {
+      title,
+      features,
+    },
+    () => {
+      t.context.clients[0].emit('feature-move-up', -1, (response: any) => {
+        t.true(response?.error);
+        t.is(response.type, ErrorType.Execution);
+        t.end();
+      });
+    }
+  );
+});
 
-            t.context.clients[0].emit(
-              'feature-move-up',
-              -1,
-              (response: any) => {
-                t.true(response?.error);
-                t.is(response.type, ErrorType.Execution);
-                t.end();
-              }
-            );
-          }
-    );
-  }
-);
+test.cb('Should be able to move feature down', (t): void => {
+  t.plan(1);
 
-test.cb(
-  'Should be able to move feature down',
-  (t): void => {
-    t.plan(1);
+  const title = 'My dashboard';
+  const features: FeatureNoWidth[] = [{ id: 1 }, { id: 0 }];
 
-    const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [{id: 1}, { id: 0 }];
-
-    t.context.clients[0].emit(
-      'create',
-      {
-        title,
-        features,
-      },
-      () => {
-            t.context.clients[0].emit(
-              'feature-move-down',
-              1,
-              (response: any) => {
-                t.is(response?.error, undefined);
-                t.end();
-              }
-            );
-          }
-    );
-  }
-);
+  t.context.clients[0].emit(
+    'create',
+    {
+      title,
+      features,
+    },
+    () => {
+      t.context.clients[0].emit('feature-move-down', 1, (response: any) => {
+        t.is(response?.error, undefined);
+        t.end();
+      });
+    }
+  );
+});
 
 test.cb(
   'Should not be able to move feature down without editing privilege',
@@ -902,7 +872,7 @@ test.cb(
     t.plan(1);
 
     const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [{id: 1}, { id: 0 }];
+    const features: FeatureNoWidth[] = [{ id: 1 }, { id: 0 }];
 
     t.context.clients[0].emit(
       'create',
@@ -912,15 +882,12 @@ test.cb(
       },
       (dashboard: Dashboard) => {
         t.context.clients[1].emit('listen', { id: dashboard.id }, () => {
-            t.context.clients[1].emit(
-              'feature-move-down',
-              1,
-              (response: any) => {
-                t.true(response?.error);
-                t.end();
-              }
-            );
-          })}
+          t.context.clients[1].emit('feature-move-down', 1, (response: any) => {
+            t.true(response?.error);
+            t.end();
+          });
+        });
+      }
     );
   }
 );
@@ -931,7 +898,7 @@ test.cb(
     t.plan(2);
 
     const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [{id: 1}, { id: 0 }];
+    const features: FeatureNoWidth[] = [{ id: 1 }, { id: 0 }];
 
     t.context.clients[0].emit(
       'create',
@@ -940,108 +907,95 @@ test.cb(
         features,
       },
       () => {
-            t.context.clients[0].emit(
-              'feature-move-down',
-              0,
-              (response: any) => {
-                t.true(response?.error);
-                t.is(response.type, ErrorType.Execution);
-                t.end();
-              }
-            );
-          }
+        t.context.clients[0].emit('feature-move-down', 0, (response: any) => {
+          t.true(response?.error);
+          t.is(response.type, ErrorType.Execution);
+          t.end();
+        });
+      }
     );
   }
 );
 
-test.cb(
-  'Should not be able to move non-existent feature down',
-  (t): void => {
-    t.plan(2);
+test.cb('Should not be able to move non-existent feature down', (t): void => {
+  t.plan(2);
 
-    const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [{id: 1}, { id: 0 }];
+  const title = 'My dashboard';
+  const features: FeatureNoWidth[] = [{ id: 1 }, { id: 0 }];
 
-    t.context.clients[0].emit(
-      'create',
-      {
-        title,
-        features,
-      },
-      () => {
-            t.context.clients[0].emit(
-              'feature-move-down',
-              -1,
-              (response: any) => {
-                t.true(response?.error);
-                t.is(response.type, ErrorType.Execution);
-                t.end();
-              }
-            );
-          }
-    );
-  }
-);
+  t.context.clients[0].emit(
+    'create',
+    {
+      title,
+      features,
+    },
+    () => {
+      t.context.clients[0].emit('feature-move-down', -1, (response: any) => {
+        t.true(response?.error);
+        t.is(response.type, ErrorType.Execution);
+        t.end();
+      });
+    }
+  );
+});
 
-test.cb(
-  'Should be able to shrink a feature',
-  (t): void => {
-    t.plan(2);
+test.cb('Should be able to shrink a feature', (t): void => {
+  t.plan(2);
 
-    const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [{id: 0 }];
+  const title = 'My dashboard';
+  const features: FeatureNoWidth[] = [{ id: 0 }];
 
-    t.context.clients[0].emit(
-      'create',
-      {
-        title,
-        features,
-      },
-      ({features}: Dashboard) => {
-        t.context.clients[0].on('edit', (newDashboard: Dashboard) => {
-          t.is(features[0].width, features[0].width !== FEATURE_MIN_WIDTH ? newDashboard.features[0].width + FEATURE_WIDTH_STEP: newDashboard.features[0].width);
-        })
-          t.context.clients[0].emit(
-            'feature-resize-shrink',
-            0,(response: any) => {
-              t.is(response?.error, undefined);
-              t.end();
-            }
-          );
-        }
-    );
-  }
-);
+  t.context.clients[0].emit(
+    'create',
+    {
+      title,
+      features,
+    },
+    ({ features }: Dashboard) => {
+      t.context.clients[0].on('edit', (newDashboard: Dashboard) => {
+        t.is(
+          features[0].width,
+          features[0].width !== FEATURE_MIN_WIDTH
+            ? newDashboard.features[0].width + FEATURE_WIDTH_STEP
+            : newDashboard.features[0].width
+        );
+      });
+      t.context.clients[0].emit('feature-resize-shrink', 0, (response: any) => {
+        t.is(response?.error, undefined);
+        t.end();
+      });
+    }
+  );
+});
 
-test.cb(
-  'Should be able to expand a feature',
-  (t): void => {
-    t.plan(2);
+test.cb('Should be able to expand a feature', (t): void => {
+  t.plan(2);
 
-    const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [{id: 0 }];
+  const title = 'My dashboard';
+  const features: FeatureNoWidth[] = [{ id: 0 }];
 
-    t.context.clients[0].emit(
-      'create',
-      {
-        title,
-        features,
-      },
-      ({features}: Dashboard) => {
-        t.context.clients[0].on('edit', (newDashboard: Dashboard) => {
-          t.is(features[0].width, features[0].width !== FEATURE_MAX_WIDTH ? newDashboard.features[0].width - FEATURE_WIDTH_STEP: newDashboard.features[0].width);
-        })
-          t.context.clients[0].emit(
-            'feature-resize-expand',
-            0,(response: any) => {
-              t.is(response?.error, undefined);
-              t.end();
-            }
-          );
-        }
-    );
-  }
-);
+  t.context.clients[0].emit(
+    'create',
+    {
+      title,
+      features,
+    },
+    ({ features }: Dashboard) => {
+      t.context.clients[0].on('edit', (newDashboard: Dashboard) => {
+        t.is(
+          features[0].width,
+          features[0].width !== FEATURE_MAX_WIDTH
+            ? newDashboard.features[0].width - FEATURE_WIDTH_STEP
+            : newDashboard.features[0].width
+        );
+      });
+      t.context.clients[0].emit('feature-resize-expand', 0, (response: any) => {
+        t.is(response?.error, undefined);
+        t.end();
+      });
+    }
+  );
+});
 
 test.cb(
   'Should not be able to shrink a feature without editing privilege',
@@ -1049,7 +1003,7 @@ test.cb(
     t.plan(1);
 
     const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [{id: 1}];
+    const features: FeatureNoWidth[] = [{ id: 1 }];
 
     t.context.clients[0].emit(
       'create',
@@ -1059,15 +1013,16 @@ test.cb(
       },
       (dashboard: Dashboard) => {
         t.context.clients[1].emit('listen', { id: dashboard.id }, () => {
-            t.context.clients[1].emit(
-              'feature-resize-shrink',
-              1,
-              (response: any) => {
-                t.true(response?.error);
-                t.end();
-              }
-            );
-          })}
+          t.context.clients[1].emit(
+            'feature-resize-shrink',
+            1,
+            (response: any) => {
+              t.true(response?.error);
+              t.end();
+            }
+          );
+        });
+      }
     );
   }
 );
@@ -1078,7 +1033,7 @@ test.cb(
     t.plan(1);
 
     const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [{id: 1}];
+    const features: FeatureNoWidth[] = [{ id: 1 }];
 
     t.context.clients[0].emit(
       'create',
@@ -1088,15 +1043,16 @@ test.cb(
       },
       (dashboard: Dashboard) => {
         t.context.clients[1].emit('listen', { id: dashboard.id }, () => {
-            t.context.clients[1].emit(
-              'feature-resize-expand',
-              1,
-              (response: any) => {
-                t.true(response?.error);
-                t.end();
-              }
-            );
-          })}
+          t.context.clients[1].emit(
+            'feature-resize-expand',
+            1,
+            (response: any) => {
+              t.true(response?.error);
+              t.end();
+            }
+          );
+        });
+      }
     );
   }
 );

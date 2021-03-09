@@ -39,13 +39,13 @@ export class MemoryConnectionRepository implements ConnectionRepository {
     if (groupId) {
       const connections = this.connections.get(groupId)!;
 
-        connections.splice(
-          connections.findIndex((c) => c.id === id),
-          1
-        );
-        if (connections.length) this.connections.set(groupId, connections);
-        else this.connections.delete(groupId);
-        this.groupOf.delete(id);
+      connections.splice(
+        connections.findIndex((c) => c.id === id),
+        1
+      );
+      if (connections.length) this.connections.set(groupId, connections);
+      else this.connections.delete(groupId);
+      this.groupOf.delete(id);
     }
   }
 
