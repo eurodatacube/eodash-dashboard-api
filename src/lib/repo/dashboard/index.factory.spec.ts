@@ -26,7 +26,7 @@ export default function dashboardRepositoryTestFactory<
     const dashboard = await t.context.repo.add(title, features);
 
     t.is(dashboard.title, title);
-    t.is(dashboard.features, features);
+    t.deepEqual(dashboard.features, features);
     t.is(typeof dashboard.id, 'string');
     t.is(typeof dashboard.editKey, 'string');
   });
@@ -42,7 +42,7 @@ export default function dashboardRepositoryTestFactory<
     t.truthy(dashboard);
 
     t.is(dashboard!.title, title);
-    t.is(dashboard!.features, features);
+    t.deepEqual(dashboard!.features, features);
     t.is(typeof (dashboard! as any).id, 'undefined');
     t.is(typeof (dashboard! as any).editKey, 'undefined');
   });
@@ -58,7 +58,7 @@ export default function dashboardRepositoryTestFactory<
     t.truthy(dashboard);
 
     t.is(dashboard!.title, title);
-    t.is(dashboard!.features, features);
+    t.deepEqual(dashboard!.features, features);
     t.is(typeof (dashboard! as any).id, 'undefined');
     t.is(typeof (dashboard! as any).editKey, 'undefined');
   });
