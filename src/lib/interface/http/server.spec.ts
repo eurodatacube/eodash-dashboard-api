@@ -128,7 +128,7 @@ test.cb(
     t.plan(2);
 
     t.context.clients[0].emit('listen', { id: '_' }, (response: any) => {
-      t.true(response.error);
+      t.true(response?.error);
       t.is(response.type, ErrorType.Execution);
       t.end();
     });
@@ -188,7 +188,7 @@ test.cb(
             editKey: '_',
           },
           (response: any) => {
-            t.true(response.error);
+            t.true(response?.error);
             t.is(response.type, ErrorType.Execution);
             t.end();
           }
@@ -567,7 +567,7 @@ test.cb(
 );
 
 test.cb('Should emit correct edit event when title changes', (t): void => {
-  t.timeout(2000);
+  t.timeout(5000);
   t.plan(1);
 
   const title = 'My dashboard';
@@ -679,7 +679,7 @@ test.cb(
 const validationMacro: CbMacro<[string], Context> = (t, callName) => {
   t.plan(3);
   t.context.clients[0].emit(callName, { __fail__: true }, (response: any) => {
-    t.true(response.error);
+    t.true(response?.error);
     t.is(response.type, ErrorType.Validation);
     t.true(response.details.length > 0);
     t.end();
@@ -712,7 +712,7 @@ test.cb(
           'create',
           { title: 'Second dashboard', features: [] },
           (response: any) => {
-            t.is(response.error, undefined);
+            t.is(response?.error, undefined);
             t.end();
           }
         );
@@ -739,7 +739,7 @@ test.cb(
                 'listen',
                 { id: dashboard.id },
                 (response: any) => {
-                  t.is(response.error, undefined);
+                  t.is(response?.error, undefined);
                   t.end();
                 }
               );
@@ -799,9 +799,9 @@ test.cb(
 );
 
 test.cb(
-  'Should not be able to move feature up if it is the first feature',
+  'Should not do anything when attempting to move feature up if it is the first feature',
   (t): void => {
-    t.plan(2);
+    t.plan(1);
 
     const title = 'My dashboard';
     const features: FeatureNoWidth[] = [{ id: '1' }, { id: '0' }];
@@ -814,8 +814,7 @@ test.cb(
       },
       () => {
         t.context.clients[0].emit('feature-move-up', '1', (response: any) => {
-          t.true(response?.error);
-          t.is(response.type, ErrorType.Execution);
+          t.is(response?.error, undefined);
           t.end();
         });
       }
@@ -893,9 +892,9 @@ test.cb(
 );
 
 test.cb(
-  'Should not be able to move feature down if it is the last feature',
+  'Should not do anything when attempting to move feature down if it is the last feature',
   (t): void => {
-    t.plan(2);
+    t.plan(1);
 
     const title = 'My dashboard';
     const features: FeatureNoWidth[] = [{ id: '1' }, { id: '0' }];
@@ -908,8 +907,7 @@ test.cb(
       },
       () => {
         t.context.clients[0].emit('feature-move-down', '0', (response: any) => {
-          t.true(response?.error);
-          t.is(response.type, ErrorType.Execution);
+          t.is(response?.error, undefined);
           t.end();
         });
       }
@@ -1108,6 +1106,54 @@ test.cb('Should not be able to expand a non-existent feature', (t): void => {
     }
   );
 });
+
+
+test.cb('Should be able to add marketing info to dashboard', (t) => {
+  t.plan(2);
+  t.context.clients[0].emit('create', { title: 'My dashboard', features: []}, () => {
+    const marketingInfo = { email: 'example@example.com', interests: [], consent: true};
+
+    t.context.clients[0].on('edit', (dto: DashboardDto) => {
+      t.deepEqual(dto.marketingInfo, marketingInfo);
+    })
+
+    t.context.clients[0].emit('add-marketing-info', marketingInfo, (response: any) => {
+      t.is(response?.error, undefined);
+      t.end();
+    })
+  })
+})
+
+test.cb('Should not be able to add marketing info to dashboard without editing privilege', (t) => {
+  t.plan(1);
+  t.context.clients[0].emit('create', { title: 'My dashboard', features: []}, ({ id }: any) => {
+    t.context.clients[1].emit('listen', {id}, ()=> {
+      t.context.clients[1].emit('add-marketing-info', { email: 'example@example.com', interests: [], consent: true}, (response: any) => {
+        t.is(response?.error, true);
+        t.end();
+      })
+    })
+  })
+})
+
+test.cb('Should do nothing when re-adding marketing info to dashboard', (t) => {
+  t.plan(2);
+
+  t.context.clients[0].emit('create', { title: 'My dashboard', features: []}, () => {
+    const originalMarketingInfo = { email: 'example@example.com', interests: [], consent: true};
+
+    // This gets called twice ;)
+    t.context.clients[0].on('edit', (dto: DashboardDto) => {
+      t.deepEqual(dto.marketingInfo, originalMarketingInfo);
+    })
+
+    t.context.clients[0].emit('add-marketing-info', originalMarketingInfo, () => {
+      t.context.clients[0].emit('add-marketing-info', {email: 'komninos@komninos.me', interests: [], consent: false}, () => {
+        t.end();
+      });
+    })
+  })
+})
 
 test.afterEach.always(async (t) => {
   await t.context.server.close();

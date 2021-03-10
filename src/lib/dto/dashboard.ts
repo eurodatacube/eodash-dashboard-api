@@ -1,6 +1,3 @@
-import { Feature } from '../domain/feature';
+import { Dashboard } from "../domain/dashboard";
 
-export type DashboardDto = {
-  title: string;
-  features: Feature[];
-};
+export type DashboardDto = Omit<Dashboard, 'id' | 'editKey'>;

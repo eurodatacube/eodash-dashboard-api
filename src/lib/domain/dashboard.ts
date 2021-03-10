@@ -5,4 +5,9 @@ export interface Dashboard {
   title: string;
   features: Feature[];
   editKey: string;
+  marketingInfo?: {
+    email: string;
+    interests: string[];
+    consent: boolean;
+  }
 }

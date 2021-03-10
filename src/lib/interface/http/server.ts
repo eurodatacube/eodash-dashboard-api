@@ -11,6 +11,7 @@ import {
   FEATURE_MIN_WIDTH,
   FEATURE_WIDTH_STEP,
 } from '../../domain/feature';
+import { Dashboard } from '../../domain/dashboard';
 import { DashboardNoKeys } from '../../dto/dashboard-no-keys';
 import { FeatureNoWidth } from '../../dto/feature-no-width';
 import { noKeysToDtoMapper } from '../../mapper/noKeysToDto';
@@ -49,6 +50,8 @@ export class DashboardServer<
         );
         this.disconnectFromDashboard(socket.id);
       });
+
+      // TODO: Create a function that abstracts socket.on and does Joi validation, error handling etc.
 
       socket.on('listen', (payload, cb) => {
         if (typeof cb !== 'function') {
@@ -332,6 +335,39 @@ export class DashboardServer<
             cb({ error: true, type: ErrorType.Execution, message: msg })
           );
       });
+
+      socket.on('add-marketing-info', (payload, cb) => {
+        if (typeof cb !== 'function') {
+          if (typeof cb === 'undefined') cb = () => {};
+          else return;
+        }
+
+        const { error, value } = Joi.object().keys({
+          email: Joi.string().email().required(),
+          interests: Joi.array().items(Joi.string()).required(),
+          consent: Joi.boolean().required()
+        }).validate(payload);
+
+        if (error) {
+          this.logger.debug(
+            `Validation for ${socket.id}'s add-marketing-info call failed: ${error.message}`
+          );
+          return cb({
+            error: true,
+            type: ErrorType.Validation,
+            details: error.details,
+          });
+        }
+        this.logger.debug(
+          `Validation for ${socket.id}'s add-marketing-info successful`
+        );
+
+        this.handleAddMarketingInfo(socket, value)
+          .then(cb)
+          .catch((msg: string) =>
+            cb({ error: true, type: ErrorType.Execution, message: msg })
+          );
+      });
     });
 
     this.dashboardRepository.on(
@@ -350,6 +386,7 @@ export class DashboardServer<
       }
     );
   }
+
   async handleFeatureResizeExpand(socket: IOSocket, featureId: string) {
     this.logger.verbose(
       `Received resize:expand call from ${socket.id} for feature ${featureId}`
@@ -381,6 +418,7 @@ export class DashboardServer<
       `${socket.id} expanded ${featureId} from dashboard ${dashboardId}`
     );
   }
+
   async handleFeatureResizeShrink(socket: IOSocket, featureId: string) {
     this.logger.verbose(
       `Received resize:shrink call from ${socket.id} for feature ${featureId}`
@@ -412,6 +450,7 @@ export class DashboardServer<
       `${socket.id} shrank ${featureId} from dashboard ${dashboardId}`
     );
   }
+
   async handleFeatureMoveDown(socket: IOSocket, featureId: string) {
     this.logger.verbose(
       `Received move:down call from ${socket.id} for feature ${featureId}`
@@ -429,10 +468,12 @@ export class DashboardServer<
       const index = dashboard.features.findIndex(
         (feature) => feature.id === featureId
       );
-      if (index !== -1 && index !== dashboard.features.length - 1) {
-        const temp = dashboard.features[index];
-        dashboard.features[index] = dashboard.features[index + 1];
-        dashboard.features[index + 1] = temp;
+      if (index !== -1) {
+        if(index !== dashboard.features.length - 1) {
+          const temp = dashboard.features[index];
+          dashboard.features[index] = dashboard.features[index + 1];
+          dashboard.features[index + 1] = temp;
+        }
       } else throw 'Feature not found';
       return dashboard;
     });
@@ -441,6 +482,7 @@ export class DashboardServer<
       `${socket.id} moved feature ${featureId} from dashboard ${dashboardId} down`
     );
   }
+
   async handleFeatureMoveUp(socket: IOSocket, featureId: string) {
     this.logger.verbose(
       `Received move:up call from ${socket.id} for feature ${featureId}`
@@ -458,16 +500,43 @@ export class DashboardServer<
       const index = dashboard.features.findIndex(
         (feature) => feature.id === featureId
       );
-      if (index > 0) {
-        const temp = dashboard.features[index];
-        dashboard.features[index] = dashboard.features[index - 1];
-        dashboard.features[index - 1] = temp;
+      if (index !== -1) {
+        if(index !== 0) {
+          const temp = dashboard.features[index];
+          dashboard.features[index] = dashboard.features[index - 1];
+          dashboard.features[index - 1] = temp;
+        }
       } else throw 'Feature not found';
       return dashboard;
     });
 
     this.logger.debug(
       `${socket.id} moved feature ${featureId} from dashboard ${dashboardId} up`
+    );
+  }
+
+  async handleAddMarketingInfo(socket: IOSocket, marketingInfo: NonNullable<Dashboard['marketingInfo']>) {
+    this.logger.verbose(
+      `Received add-marketing-info call from ${socket.id}`
+    );
+    if (!(await this.connectionRepository.hasPrivilege(socket.id))) {
+      this.logger.debug(`${socket.id} not privileged to add marketing info`);
+      throw 'User not privileged to perform this action';
+    }
+
+    const dashboardId = (await this.connectionRepository.getGroupOfConnection(
+      socket.id
+    ))!;
+
+    await this.dashboardRepository.edit(dashboardId, async (dashboard) => {
+      if(!dashboard.marketingInfo) {
+        dashboard.marketingInfo = marketingInfo;
+      }
+      return dashboard;
+    });
+
+    this.logger.debug(
+      `${socket.id} added marketing info to dashboard ${dashboardId}`
     );
   }
 
