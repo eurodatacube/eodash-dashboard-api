@@ -260,7 +260,7 @@ test.cb(
             t.context.clients[1].emit(
               'add-feature',
               {
-                id: 0,
+                id: '0',
               },
               (response: any) => {
                 t.is(response?.error, undefined);
@@ -289,7 +289,7 @@ test.cb(
         features,
       },
       (dashboard: Dashboard) => {
-        const featureId = 0;
+        const featureId = '0';
         t.context.clients[1].emit(
           'listen',
           {
@@ -324,7 +324,7 @@ test.cb('Should not be able to remove non-existent feature', (t): void => {
   t.plan(2);
 
   const title = 'My dashboard';
-  const features: FeatureNoWidth[] = [{ id: 1 }, { id: 0 }];
+  const features: FeatureNoWidth[] = [{ id: '1' }, { id: '0' }];
 
   t.context.clients[0].emit(
     'create',
@@ -340,7 +340,7 @@ test.cb('Should not be able to remove non-existent feature', (t): void => {
           editKey: dashboard.editKey,
         },
         () => {
-          t.context.clients[1].emit('remove-feature', -1, (response: any) => {
+          t.context.clients[1].emit('remove-feature', '-1', (response: any) => {
             t.true(response?.error);
             t.is(response.type, ErrorType.Execution);
             t.end();
@@ -397,7 +397,7 @@ test.cb(
         t.context.clients[0].emit(
           'add-feature',
           {
-            id: 0,
+            id: '0',
           },
           (response: any) => {
             t.is(response?.error, undefined);
@@ -424,7 +424,7 @@ test.cb(
         features,
       },
       () => {
-        const featureId = 0;
+        const featureId = '0';
 
         t.context.clients[0].emit(
           'add-feature',
@@ -507,7 +507,7 @@ test.cb(
             t.context.clients[1].emit(
               'add-feature',
               {
-                id: 0,
+                id: '0',
               },
               (response: any) => {
                 t.true(response?.error);
@@ -618,7 +618,7 @@ test.cb('Should emit correct edit event when a feature is added', (t): void => {
           id: dashboard.id,
         },
         () => {
-          const newFeature = { id: 0 };
+          const newFeature = { id: '0' };
           t.context.clients[0].emit('add-feature', newFeature, () => {
             t.context.clients[1].on('edit', (dashboard: DashboardDto) => {
               t.is(dashboard.features.length, 1);
@@ -660,7 +660,7 @@ test.cb(
             id: dashboard.id,
           },
           () => {
-            const newFeature = { id: 0 };
+            const newFeature = { id: '0' };
             t.context.clients[0].emit('add-feature', newFeature, () => {
               t.context.clients[0].emit('remove-feature', newFeature.id, () => {
                 t.context.clients[1].on('edit', (dashboard: DashboardDto) => {
@@ -755,7 +755,7 @@ test.cb('Should be able to move feature up', (t): void => {
   t.plan(1);
 
   const title = 'My dashboard';
-  const features: FeatureNoWidth[] = [{ id: 1 }, { id: 0 }];
+  const features: FeatureNoWidth[] = [{ id: '1' }, { id: '0' }];
 
   t.context.clients[0].emit(
     'create',
@@ -764,7 +764,7 @@ test.cb('Should be able to move feature up', (t): void => {
       features,
     },
     () => {
-      t.context.clients[0].emit('feature-move-up', 0, (response: any) => {
+      t.context.clients[0].emit('feature-move-up', '0', (response: any) => {
         t.is(response?.error, undefined);
         t.end();
       });
@@ -778,7 +778,7 @@ test.cb(
     t.plan(1);
 
     const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [{ id: 1 }, { id: 0 }];
+    const features: FeatureNoWidth[] = [{ id: '1' }, { id: '0' }];
 
     t.context.clients[0].emit(
       'create',
@@ -788,7 +788,7 @@ test.cb(
       },
       (dashboard: Dashboard) => {
         t.context.clients[1].emit('listen', { id: dashboard.id }, () => {
-          t.context.clients[1].emit('feature-move-up', 0, (response: any) => {
+          t.context.clients[1].emit('feature-move-up', '0', (response: any) => {
             t.true(response?.error);
             t.end();
           });
@@ -804,7 +804,7 @@ test.cb(
     t.plan(2);
 
     const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [{ id: 1 }, { id: 0 }];
+    const features: FeatureNoWidth[] = [{ id: '1' }, { id: '0' }];
 
     t.context.clients[0].emit(
       'create',
@@ -813,7 +813,7 @@ test.cb(
         features,
       },
       () => {
-        t.context.clients[0].emit('feature-move-up', 1, (response: any) => {
+        t.context.clients[0].emit('feature-move-up', '1', (response: any) => {
           t.true(response?.error);
           t.is(response.type, ErrorType.Execution);
           t.end();
@@ -827,7 +827,7 @@ test.cb('Should not be able to move non-existent feature up', (t): void => {
   t.plan(2);
 
   const title = 'My dashboard';
-  const features: FeatureNoWidth[] = [{ id: 1 }, { id: 0 }];
+  const features: FeatureNoWidth[] = [{ id: '1' }, { id: '0' }];
 
   t.context.clients[0].emit(
     'create',
@@ -836,7 +836,7 @@ test.cb('Should not be able to move non-existent feature up', (t): void => {
       features,
     },
     () => {
-      t.context.clients[0].emit('feature-move-up', -1, (response: any) => {
+      t.context.clients[0].emit('feature-move-up', '-1', (response: any) => {
         t.true(response?.error);
         t.is(response.type, ErrorType.Execution);
         t.end();
@@ -849,7 +849,7 @@ test.cb('Should be able to move feature down', (t): void => {
   t.plan(1);
 
   const title = 'My dashboard';
-  const features: FeatureNoWidth[] = [{ id: 1 }, { id: 0 }];
+  const features: FeatureNoWidth[] = [{ id: '1' }, { id: '0' }];
 
   t.context.clients[0].emit(
     'create',
@@ -858,7 +858,7 @@ test.cb('Should be able to move feature down', (t): void => {
       features,
     },
     () => {
-      t.context.clients[0].emit('feature-move-down', 1, (response: any) => {
+      t.context.clients[0].emit('feature-move-down', '1', (response: any) => {
         t.is(response?.error, undefined);
         t.end();
       });
@@ -872,7 +872,7 @@ test.cb(
     t.plan(1);
 
     const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [{ id: 1 }, { id: 0 }];
+    const features: FeatureNoWidth[] = [{ id: '1' }, { id: '0' }];
 
     t.context.clients[0].emit(
       'create',
@@ -882,7 +882,7 @@ test.cb(
       },
       (dashboard: Dashboard) => {
         t.context.clients[1].emit('listen', { id: dashboard.id }, () => {
-          t.context.clients[1].emit('feature-move-down', 1, (response: any) => {
+          t.context.clients[1].emit('feature-move-down', '1', (response: any) => {
             t.true(response?.error);
             t.end();
           });
@@ -898,7 +898,7 @@ test.cb(
     t.plan(2);
 
     const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [{ id: 1 }, { id: 0 }];
+    const features: FeatureNoWidth[] = [{ id: '1' }, { id: '0' }];
 
     t.context.clients[0].emit(
       'create',
@@ -907,7 +907,7 @@ test.cb(
         features,
       },
       () => {
-        t.context.clients[0].emit('feature-move-down', 0, (response: any) => {
+        t.context.clients[0].emit('feature-move-down', '0', (response: any) => {
           t.true(response?.error);
           t.is(response.type, ErrorType.Execution);
           t.end();
@@ -921,7 +921,7 @@ test.cb('Should not be able to move non-existent feature down', (t): void => {
   t.plan(2);
 
   const title = 'My dashboard';
-  const features: FeatureNoWidth[] = [{ id: 1 }, { id: 0 }];
+  const features: FeatureNoWidth[] = [{ id: '1' }, { id: '0' }];
 
   t.context.clients[0].emit(
     'create',
@@ -930,7 +930,7 @@ test.cb('Should not be able to move non-existent feature down', (t): void => {
       features,
     },
     () => {
-      t.context.clients[0].emit('feature-move-down', -1, (response: any) => {
+      t.context.clients[0].emit('feature-move-down', '-1', (response: any) => {
         t.true(response?.error);
         t.is(response.type, ErrorType.Execution);
         t.end();
@@ -943,7 +943,7 @@ test.cb('Should be able to shrink a feature', (t): void => {
   t.plan(2);
 
   const title = 'My dashboard';
-  const features: FeatureNoWidth[] = [{ id: 0 }];
+  const features: FeatureNoWidth[] = [{ id: '0' }];
 
   t.context.clients[0].emit(
     'create',
@@ -960,7 +960,7 @@ test.cb('Should be able to shrink a feature', (t): void => {
             : newDashboard.features[0].width
         );
       });
-      t.context.clients[0].emit('feature-resize-shrink', 0, (response: any) => {
+      t.context.clients[0].emit('feature-resize-shrink', '0', (response: any) => {
         t.is(response?.error, undefined);
         t.end();
       });
@@ -972,7 +972,7 @@ test.cb('Should be able to expand a feature', (t): void => {
   t.plan(2);
 
   const title = 'My dashboard';
-  const features: FeatureNoWidth[] = [{ id: 0 }];
+  const features: FeatureNoWidth[] = [{ id: '0' }];
 
   t.context.clients[0].emit(
     'create',
@@ -989,7 +989,7 @@ test.cb('Should be able to expand a feature', (t): void => {
             : newDashboard.features[0].width
         );
       });
-      t.context.clients[0].emit('feature-resize-expand', 0, (response: any) => {
+      t.context.clients[0].emit('feature-resize-expand', '0', (response: any) => {
         t.is(response?.error, undefined);
         t.end();
       });
@@ -1003,7 +1003,7 @@ test.cb(
     t.plan(1);
 
     const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [{ id: 1 }];
+    const features: FeatureNoWidth[] = [{ id: '1' }];
 
     t.context.clients[0].emit(
       'create',
@@ -1033,7 +1033,7 @@ test.cb(
     t.plan(1);
 
     const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [{ id: 1 }];
+    const features: FeatureNoWidth[] = [{ id: '1' }];
 
     t.context.clients[0].emit(
       'create',
@@ -1061,7 +1061,7 @@ test.cb('Should not be able to shrink a non-existent feature', (t): void => {
   t.plan(2);
 
   const title = 'My dashboard';
-  const features: FeatureNoWidth[] = [{ id: 0 }];
+  const features: FeatureNoWidth[] = [{ id: '0' }];
 
   t.context.clients[0].emit(
     'create',
@@ -1072,7 +1072,7 @@ test.cb('Should not be able to shrink a non-existent feature', (t): void => {
     () => {
       t.context.clients[0].emit(
         'feature-resize-shrink',
-        -1,
+        '-1',
         (response: any) => {
           t.true(response?.error);
           t.is(response.type, ErrorType.Execution);
@@ -1087,7 +1087,7 @@ test.cb('Should not be able to expand a non-existent feature', (t): void => {
   t.plan(2);
 
   const title = 'My dashboard';
-  const features: FeatureNoWidth[] = [{ id: 0 }];
+  const features: FeatureNoWidth[] = [{ id: '0' }];
 
   t.context.clients[0].emit(
     'create',
@@ -1098,7 +1098,7 @@ test.cb('Should not be able to expand a non-existent feature', (t): void => {
     () => {
       t.context.clients[0].emit(
         'feature-resize-expand',
-        -1,
+        '-1',
         (response: any) => {
           t.true(response?.error);
           t.is(response.type, ErrorType.Execution);

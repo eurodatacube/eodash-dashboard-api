@@ -1,4 +1,4 @@
 export type FeatureNoWidth = {
-  id: number;
+  id: string;
   [key: string]: any;
 };

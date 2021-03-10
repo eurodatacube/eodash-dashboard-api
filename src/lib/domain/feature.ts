@@ -1,5 +1,5 @@
 export interface Feature {
-  id: number;
+  id: string;
   width: number;
   [key: string]: any;
 }

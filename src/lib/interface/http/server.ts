@@ -94,7 +94,7 @@ export class DashboardServer<
             // TODO: DDD violation. Move validation to domain.
             features: Joi.array().items(
               Joi.object({
-                id: Joi.number().required(),
+                id: Joi.string().required(),
               }).options({ allowUnknown: true })
             ),
           })
@@ -162,7 +162,7 @@ export class DashboardServer<
 
         // TODO: DDD violation. Move validation to domain.
         const { error, value } = Joi.object({
-          id: Joi.number().required(),
+          id: Joi.string().required(),
         })
           .options({ allowUnknown: true })
           .validate(payload);
@@ -194,7 +194,7 @@ export class DashboardServer<
           else return;
         }
 
-        const { error, value } = Joi.number().validate(payload);
+        const { error, value } = Joi.string().validate(payload);
 
         if (error) {
           this.logger.debug(
@@ -223,7 +223,7 @@ export class DashboardServer<
           else return;
         }
 
-        const { error, value } = Joi.number().validate(payload);
+        const { error, value } = Joi.string().validate(payload);
 
         if (error) {
           this.logger.debug(
@@ -252,7 +252,7 @@ export class DashboardServer<
           else return;
         }
 
-        const { error, value } = Joi.number().validate(payload);
+        const { error, value } = Joi.string().validate(payload);
 
         if (error) {
           this.logger.debug(
@@ -281,7 +281,7 @@ export class DashboardServer<
           else return;
         }
 
-        const { error, value } = Joi.number().validate(payload);
+        const { error, value } = Joi.string().validate(payload);
 
         if (error) {
           this.logger.debug(
@@ -310,7 +310,7 @@ export class DashboardServer<
           else return;
         }
 
-        const { error, value } = Joi.number().validate(payload);
+        const { error, value } = Joi.string().validate(payload);
 
         if (error) {
           this.logger.debug(
@@ -350,7 +350,7 @@ export class DashboardServer<
       }
     );
   }
-  async handleFeatureResizeExpand(socket: IOSocket, featureId: number) {
+  async handleFeatureResizeExpand(socket: IOSocket, featureId: string) {
     this.logger.verbose(
       `Received resize:expand call from ${socket.id} for feature ${featureId}`
     );
@@ -381,7 +381,7 @@ export class DashboardServer<
       `${socket.id} expanded ${featureId} from dashboard ${dashboardId}`
     );
   }
-  async handleFeatureResizeShrink(socket: IOSocket, featureId: number) {
+  async handleFeatureResizeShrink(socket: IOSocket, featureId: string) {
     this.logger.verbose(
       `Received resize:shrink call from ${socket.id} for feature ${featureId}`
     );
@@ -412,7 +412,7 @@ export class DashboardServer<
       `${socket.id} shrank ${featureId} from dashboard ${dashboardId}`
     );
   }
-  async handleFeatureMoveDown(socket: IOSocket, featureId: number) {
+  async handleFeatureMoveDown(socket: IOSocket, featureId: string) {
     this.logger.verbose(
       `Received move:down call from ${socket.id} for feature ${featureId}`
     );
@@ -441,7 +441,7 @@ export class DashboardServer<
       `${socket.id} moved feature ${featureId} from dashboard ${dashboardId} down`
     );
   }
-  async handleFeatureMoveUp(socket: IOSocket, featureId: number) {
+  async handleFeatureMoveUp(socket: IOSocket, featureId: string) {
     this.logger.verbose(
       `Received move:up call from ${socket.id} for feature ${featureId}`
     );
@@ -568,9 +568,9 @@ export class DashboardServer<
     );
   }
 
-  private async handleRemoveFeature(socket: IOSocket, id: number) {
+  private async handleRemoveFeature(socket: IOSocket, featureId: string) {
     this.logger.verbose(
-      `Received remove-feature call from ${socket.id} with new feature with id ${id}`
+      `Received remove-feature call from ${socket.id} with new feature with id ${featureId}`
     );
 
     if (!(await this.connectionRepository.hasPrivilege(socket.id))) {
@@ -583,7 +583,7 @@ export class DashboardServer<
     ))!;
 
     await this.dashboardRepository.edit(dashboardId, async (dashboard) => {
-      const index = dashboard.features.findIndex((f) => f.id === id);
+      const index = dashboard.features.findIndex((f) => f.id === featureId);
 
       if (index === -1) throw 'Feature not found';
 
@@ -592,7 +592,7 @@ export class DashboardServer<
     });
 
     this.logger.debug(
-      `${socket.id} removed feature with id ${id} from dashboard ${dashboardId}`
+      `${socket.id} removed feature with id ${featureId} from dashboard ${dashboardId}`
     );
   }
 
