@@ -7,7 +7,11 @@ import { DashboardRepository } from '.';
 
 export default function dashboardRepositoryTestFactory<
   DR extends DashboardRepository
->(anyTest: TestInterface, dashboardRepositoryFactory: () => DR) {
+>(
+  anyTest: TestInterface,
+  dashboardRepositoryFactory: () => Promise<DR>,
+  cleanupFunction?: () => Promise<void>
+) {
   type Context = {
     repo: DR;
   };
@@ -15,7 +19,7 @@ export default function dashboardRepositoryTestFactory<
   const test = anyTest as TestInterface<Context>;
 
   test.beforeEach(async (t) => {
-    t.context.repo = dashboardRepositoryFactory();
+    t.context.repo = await dashboardRepositoryFactory();
     await t.context.repo.connect();
   });
 
@@ -100,6 +104,7 @@ export default function dashboardRepositoryTestFactory<
 
   test.cb('Should emit edit event when an edit happens', (t) => {
     t.plan(2);
+    t.timeout(10000);
 
     const title = 'My dashboard';
     const features: Feature[] = [];
@@ -137,4 +142,9 @@ export default function dashboardRepositoryTestFactory<
   test.afterEach.always((t) => {
     t.context.repo.close();
   });
+
+  if (cleanupFunction)
+    test.after.always(async () => {
+      await cleanupFunction();
+    });
 }

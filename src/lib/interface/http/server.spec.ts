@@ -49,7 +49,7 @@ test.beforeEach(async (t) => {
           ),
         }),
       ],
-      silent: false,
+      silent: true,
     })
   );
 
@@ -1057,61 +1057,57 @@ test.cb(
   }
 );
 
-// test.cb(
-//   'Should not be able to shrink a non-existent feature',
-//   (t): void => {
-//     t.plan(1);
+test.cb('Should not be able to shrink a non-existent feature', (t): void => {
+  t.plan(2);
 
-//     const title = 'My dashboard';
-//     const features: FeatureNoWidth[] = [{id: 0 }];
+  const title = 'My dashboard';
+  const features: FeatureNoWidth[] = [{ id: 0 }];
 
-//     t.context.clients[0].emit(
-//       'create',
-//       {
-//         title,
-//         features,
-//       },
-//       () => {
-//           t.context.clients[0].emit(
-//             'feature-resize-shrink',
-//             -1,
-//             (response: any) => {
-//               t.true(response?.error);
-//               t.is(response.type, ErrorType.Execution);
-//             }
-//           );
-//         }
-//     );
-//   }
-// );
+  t.context.clients[0].emit(
+    'create',
+    {
+      title,
+      features,
+    },
+    () => {
+      t.context.clients[0].emit(
+        'feature-resize-shrink',
+        -1,
+        (response: any) => {
+          t.true(response?.error);
+          t.is(response.type, ErrorType.Execution);
+          t.end();
+        }
+      );
+    }
+  );
+});
 
-// test.cb(
-//   'Should not be able to expand a non-existent feature',
-//   (t): void => {
-//     t.plan(1);
+test.cb('Should not be able to expand a non-existent feature', (t): void => {
+  t.plan(2);
 
-//     const title = 'My dashboard';
-//     const features: FeatureNoWidth[] = [{id: 0 }];
+  const title = 'My dashboard';
+  const features: FeatureNoWidth[] = [{ id: 0 }];
 
-//     t.context.clients[0].emit(
-//       'create',
-//       {
-//         title,
-//         features,
-//       },
-//       () => {
-//           t.context.clients[0].emit(
-//             'feature-resize-expand',
-//             -1,
-//             (response: any) => {
-//               t.true(response?.error);
-//               t.is(response.type, ErrorType.Execution);
-//             }
-//           );
-//         }
-//     );
-//   }
-// );
+  t.context.clients[0].emit(
+    'create',
+    {
+      title,
+      features,
+    },
+    () => {
+      t.context.clients[0].emit(
+        'feature-resize-expand',
+        -1,
+        (response: any) => {
+          t.true(response?.error);
+          t.is(response.type, ErrorType.Execution);
+          t.end();
+        }
+      );
+    }
+  );
+});
 
 test.afterEach.always(async (t) => {
   await t.context.server.close();

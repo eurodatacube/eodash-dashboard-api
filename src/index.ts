@@ -1,8 +1,11 @@
+import AWS from 'aws-sdk';
 import { onShutdown } from 'node-graceful-shutdown';
 import * as winston from 'winston';
 
 import { DashboardServer } from './lib/interface/http/server';
 import { MemoryConnectionRepository } from './lib/repo/connection/memory';
+import { DashboardRepository } from './lib/repo/dashboard';
+import { DynamoDBDashboardRepository } from './lib/repo/dashboard/dynamodb';
 import { MemoryDashboardRepository } from './lib/repo/dashboard/memory';
 
 const missingEnvVariables = ['HOST', 'PORT'].filter((v) => !process.env[v]);
@@ -22,6 +25,8 @@ const logger = winston.createLogger({
   ],
 });
 
+let dashboardRepository: DashboardRepository = new MemoryDashboardRepository(8);
+
 if (process.env.NODE_ENV === 'production') {
   logger.add(
     new winston.transports.File({
@@ -36,12 +41,37 @@ if (process.env.NODE_ENV === 'production') {
       format: winston.format.json(),
     })
   );
+
+  const awsAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
+  const awsSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+
+  if (awsAccessKeyId && awsSecretAccessKey) {
+    AWS.config.update(
+      {
+        // TODO: Change region to Europe
+        region: 'local',
+        accessKeyId: awsAccessKeyId,
+        secretAccessKey: awsSecretAccessKey,
+      },
+      true
+    );
+
+    dashboardRepository = new DynamoDBDashboardRepository(
+      'dashboard',
+      8,
+      new AWS.DynamoDB(),
+      new AWS.DynamoDB.DocumentClient()
+    );
+    logger.info('Using DynamoDBDashboardRepository');
+  } else {
+    logger.info('Using MemoryDashboardRepository');
+  }
 }
 
 const server = new DashboardServer(
   process.env.HOST!,
   parseInt(process.env.PORT!),
-  new MemoryDashboardRepository(8),
+  dashboardRepository,
   new MemoryConnectionRepository(),
   logger
 );

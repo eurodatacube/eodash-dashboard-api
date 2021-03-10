@@ -4,7 +4,7 @@ import { ConnectionRepository } from '.';
 
 export default function connectionRepositoryTestFactory<
   CR extends ConnectionRepository
->(anyTest: TestInterface, connectionRepositoryFactory: () => CR) {
+>(anyTest: TestInterface, connectionRepositoryFactory: () => Promise<CR>) {
   type Context = {
     repo: CR;
   };
@@ -12,7 +12,7 @@ export default function connectionRepositoryTestFactory<
   const test = anyTest as TestInterface<Context>;
 
   test.beforeEach(async (t) => {
-    t.context.repo = connectionRepositoryFactory();
+    t.context.repo = await connectionRepositoryFactory();
     await t.context.repo.connect();
   });
 
