@@ -2,10 +2,10 @@ import test from 'ava';
 import AWS from 'aws-sdk';
 import DynamoDbLocal from 'dynamodb-local';
 import getPort from 'get-port';
+import isDocker from 'is-docker';
 
 import { DynamoDBDashboardRepository } from './dynamodb';
 import dashboardRepositoryTestFactory from './index.factory.spec';
-
 let port = -1;
 
 dashboardRepositoryTestFactory(
@@ -18,7 +18,7 @@ dashboardRepositoryTestFactory(
     AWS.config.update(
       {
         region: 'local',
-        endpoint: `http://localhost:${port}`,
+        endpoint: `http://${!isDocker() ? 'localhost' : '172.17.0.1'}:${port}`,
         accessKeyId: 'accessKeyId',
         secretAccessKey: 'secretAccessKey',
       },
