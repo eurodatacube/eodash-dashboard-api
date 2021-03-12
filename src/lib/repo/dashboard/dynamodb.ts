@@ -23,33 +23,29 @@ export class DynamoDBDashboardRepository
     super();
   }
 
-  // TODO: Add pagination. If we have more than 100 DynamoDB tables this might not work
   connect(): Promise<void> {
     return this.db
-      .listTables({})
+      .createTable({
+        TableName: this.tableName,
+        KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
+        AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }],
+        ProvisionedThroughput: {
+          ReadCapacityUnits: 1,
+          WriteCapacityUnits: 1,
+        },
+      })
       .promise()
-      .then((data) => {
-        // Check if table is already created
-        const exists =
-          data.TableNames!.filter((name) => name === this.tableName).length > 0;
-
-        if (exists) return;
-        else
-          return this.db
-            .createTable({
-              TableName: this.tableName,
-              KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
-              AttributeDefinitions: [
-                { AttributeName: 'id', AttributeType: 'S' },
-              ],
-              ProvisionedThroughput: {
-                ReadCapacityUnits: 1,
-                WriteCapacityUnits: 1,
-              },
-            })
-            .promise()
-            .then(() => {});
-      });
+      .catch((error) => {
+        if (
+          !(
+            error.code === 'ResourceInUseException' &&
+            error.message === 'Cannot create preexisting table'
+          )
+        ) {
+          throw error;
+        }
+      })
+      .then();
   }
 
   async add(title: string, features: Feature[]): Promise<Dashboard> {
