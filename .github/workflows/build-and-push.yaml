@@ -37,5 +37,5 @@ jobs:
       - name: test and push
         run: |
           IMG="eurodatacube/eodash-dashboard-api:${{ steps.get_image_tag.outputs.TAG }}"
-          docker run "${IMG}" yarn run test || exit 1
+          docker --network="host" run "${IMG}" yarn run test || exit 1
           docker push "${IMG}"
