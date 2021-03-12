@@ -2,7 +2,6 @@ import test from 'ava';
 import AWS from 'aws-sdk';
 import DynamoDbLocal from 'dynamodb-local';
 import getPort from 'get-port';
-import isDocker from 'is-docker';
 
 import { DynamoDBDashboardRepository } from './dynamodb';
 import dashboardRepositoryTestFactory from './index.factory.spec';
