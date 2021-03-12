@@ -7,9 +7,9 @@ ARG HOST=0.0.0.0
 ARG PORT=8080
 EXPOSE 8080
 
-RUN apt-get update \
-  && apt-get install default-jre
-  && apt-get install default-jdk
+RUN apt-get update -y \
+  && apt-get install default-jre -y \
+  && apt-get install default-jdk -y
 
 # Create directory
 RUN mkdir -p /opt/node_app && chown node:node /opt/node_app
