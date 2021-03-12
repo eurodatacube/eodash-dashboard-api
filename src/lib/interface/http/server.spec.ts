@@ -881,10 +881,14 @@ test.cb(
       },
       (dashboard: Dashboard) => {
         t.context.clients[1].emit('listen', { id: dashboard.id }, () => {
-          t.context.clients[1].emit('feature-move-down', '1', (response: any) => {
-            t.true(response?.error);
-            t.end();
-          });
+          t.context.clients[1].emit(
+            'feature-move-down',
+            '1',
+            (response: any) => {
+              t.true(response?.error);
+              t.end();
+            }
+          );
         });
       }
     );
@@ -958,10 +962,14 @@ test.cb('Should be able to shrink a feature', (t): void => {
             : newDashboard.features[0].width
         );
       });
-      t.context.clients[0].emit('feature-resize-shrink', '0', (response: any) => {
-        t.is(response?.error, undefined);
-        t.end();
-      });
+      t.context.clients[0].emit(
+        'feature-resize-shrink',
+        '0',
+        (response: any) => {
+          t.is(response?.error, undefined);
+          t.end();
+        }
+      );
     }
   );
 });
@@ -987,10 +995,14 @@ test.cb('Should be able to expand a feature', (t): void => {
             : newDashboard.features[0].width
         );
       });
-      t.context.clients[0].emit('feature-resize-expand', '0', (response: any) => {
-        t.is(response?.error, undefined);
-        t.end();
-      });
+      t.context.clients[0].emit(
+        'feature-resize-expand',
+        '0',
+        (response: any) => {
+          t.is(response?.error, undefined);
+          t.end();
+        }
+      );
     }
   );
 });
@@ -1107,53 +1119,91 @@ test.cb('Should not be able to expand a non-existent feature', (t): void => {
   );
 });
 
-
 test.cb('Should be able to add marketing info to dashboard', (t) => {
   t.plan(2);
-  t.context.clients[0].emit('create', { title: 'My dashboard', features: []}, () => {
-    const marketingInfo = { email: 'example@example.com', interests: [], consent: true};
+  t.context.clients[0].emit(
+    'create',
+    { title: 'My dashboard', features: [] },
+    () => {
+      const marketingInfo = {
+        email: 'example@example.com',
+        interests: [],
+        consent: true,
+      };
 
-    t.context.clients[0].on('edit', (dto: DashboardDto) => {
-      t.deepEqual(dto.marketingInfo, marketingInfo);
-    })
+      t.context.clients[0].on('edit', (dto: DashboardDto) => {
+        t.deepEqual(dto.marketingInfo, marketingInfo);
+      });
 
-    t.context.clients[0].emit('add-marketing-info', marketingInfo, (response: any) => {
-      t.is(response?.error, undefined);
-      t.end();
-    })
-  })
-})
+      t.context.clients[0].emit(
+        'add-marketing-info',
+        marketingInfo,
+        (response: any) => {
+          t.is(response?.error, undefined);
+          t.end();
+        }
+      );
+    }
+  );
+});
 
-test.cb('Should not be able to add marketing info to dashboard without editing privilege', (t) => {
-  t.plan(1);
-  t.context.clients[0].emit('create', { title: 'My dashboard', features: []}, ({ id }: any) => {
-    t.context.clients[1].emit('listen', {id}, ()=> {
-      t.context.clients[1].emit('add-marketing-info', { email: 'example@example.com', interests: [], consent: true}, (response: any) => {
-        t.is(response?.error, true);
-        t.end();
-      })
-    })
-  })
-})
+test.cb(
+  'Should not be able to add marketing info to dashboard without editing privilege',
+  (t) => {
+    t.plan(1);
+    t.context.clients[0].emit(
+      'create',
+      { title: 'My dashboard', features: [] },
+      ({ id }: any) => {
+        t.context.clients[1].emit('listen', { id }, () => {
+          t.context.clients[1].emit(
+            'add-marketing-info',
+            { email: 'example@example.com', interests: [], consent: true },
+            (response: any) => {
+              t.is(response?.error, true);
+              t.end();
+            }
+          );
+        });
+      }
+    );
+  }
+);
 
 test.cb('Should do nothing when re-adding marketing info to dashboard', (t) => {
   t.plan(2);
 
-  t.context.clients[0].emit('create', { title: 'My dashboard', features: []}, () => {
-    const originalMarketingInfo = { email: 'example@example.com', interests: [], consent: true};
+  t.context.clients[0].emit(
+    'create',
+    { title: 'My dashboard', features: [] },
+    () => {
+      const originalMarketingInfo = {
+        email: 'example@example.com',
+        interests: [],
+        consent: true,
+      };
 
-    // This gets called twice ;)
-    t.context.clients[0].on('edit', (dto: DashboardDto) => {
-      t.deepEqual(dto.marketingInfo, originalMarketingInfo);
-    })
-
-    t.context.clients[0].emit('add-marketing-info', originalMarketingInfo, () => {
-      t.context.clients[0].emit('add-marketing-info', {email: 'komninos@komninos.me', interests: [], consent: false}, () => {
-        t.end();
+      // This gets called twice ;)
+      t.context.clients[0].on('edit', (dto: DashboardDto) => {
+        t.deepEqual(dto.marketingInfo, originalMarketingInfo);
       });
-    })
-  })
-})
+
+      t.context.clients[0].emit(
+        'add-marketing-info',
+        originalMarketingInfo,
+        () => {
+          t.context.clients[0].emit(
+            'add-marketing-info',
+            { email: 'komninos@komninos.me', interests: [], consent: false },
+            () => {
+              t.end();
+            }
+          );
+        }
+      );
+    }
+  );
+});
 
 test.afterEach.always(async (t) => {
   await t.context.server.close();

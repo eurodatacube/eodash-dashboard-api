@@ -9,5 +9,5 @@ export interface Dashboard {
     email: string;
     interests: string[];
     consent: boolean;
-  }
+  };
 }

@@ -5,13 +5,13 @@ import Joi from 'joi';
 import { Server as IOServer, Socket as IOSocket } from 'socket.io';
 import { Logger } from 'winston';
 
+import { Dashboard } from '../../domain/dashboard';
 import {
   Feature,
   FEATURE_MAX_WIDTH,
   FEATURE_MIN_WIDTH,
   FEATURE_WIDTH_STEP,
 } from '../../domain/feature';
-import { Dashboard } from '../../domain/dashboard';
 import { DashboardNoKeys } from '../../dto/dashboard-no-keys';
 import { FeatureNoWidth } from '../../dto/feature-no-width';
 import { noKeysToDtoMapper } from '../../mapper/noKeysToDto';
@@ -342,11 +342,13 @@ export class DashboardServer<
           else return;
         }
 
-        const { error, value } = Joi.object().keys({
-          email: Joi.string().email().required(),
-          interests: Joi.array().items(Joi.string()).required(),
-          consent: Joi.boolean().required()
-        }).validate(payload);
+        const { error, value } = Joi.object()
+          .keys({
+            email: Joi.string().email().required(),
+            interests: Joi.array().items(Joi.string()).required(),
+            consent: Joi.boolean().required(),
+          })
+          .validate(payload);
 
         if (error) {
           this.logger.debug(
@@ -469,7 +471,7 @@ export class DashboardServer<
         (feature) => feature.id === featureId
       );
       if (index !== -1) {
-        if(index !== dashboard.features.length - 1) {
+        if (index !== dashboard.features.length - 1) {
           const temp = dashboard.features[index];
           dashboard.features[index] = dashboard.features[index + 1];
           dashboard.features[index + 1] = temp;
@@ -501,7 +503,7 @@ export class DashboardServer<
         (feature) => feature.id === featureId
       );
       if (index !== -1) {
-        if(index !== 0) {
+        if (index !== 0) {
           const temp = dashboard.features[index];
           dashboard.features[index] = dashboard.features[index - 1];
           dashboard.features[index - 1] = temp;
@@ -515,10 +517,11 @@ export class DashboardServer<
     );
   }
 
-  async handleAddMarketingInfo(socket: IOSocket, marketingInfo: NonNullable<Dashboard['marketingInfo']>) {
-    this.logger.verbose(
-      `Received add-marketing-info call from ${socket.id}`
-    );
+  async handleAddMarketingInfo(
+    socket: IOSocket,
+    marketingInfo: NonNullable<Dashboard['marketingInfo']>
+  ) {
+    this.logger.verbose(`Received add-marketing-info call from ${socket.id}`);
     if (!(await this.connectionRepository.hasPrivilege(socket.id))) {
       this.logger.debug(`${socket.id} not privileged to add marketing info`);
       throw 'User not privileged to perform this action';
@@ -529,7 +532,7 @@ export class DashboardServer<
     ))!;
 
     await this.dashboardRepository.edit(dashboardId, async (dashboard) => {
-      if(!dashboard.marketingInfo) {
+      if (!dashboard.marketingInfo) {
         dashboard.marketingInfo = marketingInfo;
       }
       return dashboard;

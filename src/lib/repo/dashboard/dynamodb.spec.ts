@@ -6,7 +6,6 @@ import getPort from 'get-port';
 import { DynamoDBDashboardRepository } from './dynamodb';
 import dashboardRepositoryTestFactory from './index.factory.spec';
 
-
 let port = -1;
 
 dashboardRepositoryTestFactory(
