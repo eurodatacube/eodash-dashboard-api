@@ -50,7 +50,7 @@ returns instance of `DashboardDto`.
 
 ### create
 
-Creates a new dashboard. The user is automatically connected to the new dashboard and a `connect` call is not required.
+Creates a new dashboard. The user is automatically connected to the new dashboard and a `listen` call is not required.
 
 ```ts
 // Payload
@@ -61,6 +61,20 @@ Creates a new dashboard. The user is automatically connected to the new dashboar
 ```
 
 returns instance of `Dashboard`.
+
+### listen
+
+Listens to an already existing dashboard.
+
+```ts
+// Payload
+{
+  id: string,
+  editKey?: string
+}
+```
+
+returns instance of `DashboardDto`.
 
 ### change-title
 
