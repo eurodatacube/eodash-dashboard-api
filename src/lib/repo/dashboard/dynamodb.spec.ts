@@ -18,7 +18,9 @@ dashboardRepositoryTestFactory(
     AWS.config.update(
       {
         region: 'local',
-        endpoint: `http://${!isDocker() ? 'localhost' : 'host.docker.internal'}:${port}`,
+        endpoint: `http://${
+          !isDocker() ? 'localhost' : 'host.docker.internal'
+        }:${port}`,
         accessKeyId: 'accessKeyId',
         secretAccessKey: 'secretAccessKey',
       },
