@@ -48,8 +48,7 @@ if (process.env.NODE_ENV === 'production') {
   if (awsAccessKeyId && awsSecretAccessKey) {
     AWS.config.update(
       {
-        // TODO: Change region to Europe
-        region: 'local',
+        region: 'eu-central-1',
         accessKeyId: awsAccessKeyId,
         secretAccessKey: awsSecretAccessKey,
       },
