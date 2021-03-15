@@ -28,7 +28,7 @@ yarn run watch
 ```
 This will listen to changes on both the source and test files. There are also commands to do this separately: `yarn run watch:build` and `yarn run watch:test`
 
-## Linting
+## Lint
 We use [ESLint](https://eslint.org/), [Prettier](https://prettier.io/) and [CSpell](https://github.com/streetsidesoftware/cspell) for linting.
 
 To lint all the source and test files run
