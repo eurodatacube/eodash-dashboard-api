@@ -3,8 +3,8 @@
 FROM adoptopenjdk:11-jre-hotspot
 
 # Listen address defaults to 0.0.0.0:8080
-ARG HOST=0.0.0.0
-ARG PORT=8080
+ENV HOST=0.0.0.0
+ENV PORT=8080
 EXPOSE 8080
 
 # Can be overwritten by compose
