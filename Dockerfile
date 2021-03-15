@@ -7,6 +7,9 @@ ARG HOST=0.0.0.0
 ARG PORT=8080
 EXPOSE 8080
 
+# Can be overwritten by compose
+ENV NODE_ENV=production
+
 # Install Node, NPM, Yarn
 RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash
 RUN apt-get install -y nodejs
