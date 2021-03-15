@@ -167,6 +167,25 @@ number; // The id of the feature
 
 returns `void`.
 
+### add-marketing-info
+
+Adds marketing related information to a dashboard.
+
+If the user does not have privilege to edit the dashboard, an error is thrown.
+
+If the marketing info already exists nothing happens.
+
+```ts
+// Payload
+{
+  email: string;
+  interests: string[];
+  consent: boolean;
+}
+```
+
+returns `void`.
+
 ## Client events
 
 The following events are sent from the server to clients connected to a dashboard.
