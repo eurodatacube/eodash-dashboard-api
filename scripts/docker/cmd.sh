@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 yarn run build
-yarn run start:main
+NODE_ENV=production yarn run start:main
