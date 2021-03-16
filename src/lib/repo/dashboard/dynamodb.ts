@@ -39,7 +39,7 @@ export class DynamoDBDashboardRepository
         if (
           !(
             error.code === 'ResourceInUseException' &&
-            error.message === 'Cannot create preexisting table'
+            error.message === `Table already exists: ${this.tableName}`
           )
         ) {
           throw error;
