@@ -17,7 +17,7 @@ dashboardRepositoryTestFactory(
     AWS.config.update(
       {
         region: 'local',
-        endpoint: `http://127.0.0.1:${port}`,
+        endpoint: `http://localhost:${port}`,
         accessKeyId: 'accessKeyId',
         secretAccessKey: 'secretAccessKey',
       },
