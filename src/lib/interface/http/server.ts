@@ -344,7 +344,7 @@ export class DashboardServer<
 
         const { error, value } = Joi.object()
           .keys({
-            email: Joi.string().email().required(),
+            email: Joi.string().required(),
             interests: Joi.array().items(Joi.string()).required(),
             consent: Joi.boolean().required(),
           })
