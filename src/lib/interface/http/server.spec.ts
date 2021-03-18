@@ -1127,7 +1127,7 @@ test.cb('Should be able to add marketing info to dashboard', (t) => {
     () => {
       const marketingInfo = {
         email: 'example@example.com',
-        interests: [],
+        interests: ['whatever'],
         consent: true,
       };
 
@@ -1179,7 +1179,7 @@ test.cb('Should do nothing when re-adding marketing info to dashboard', (t) => {
     () => {
       const originalMarketingInfo = {
         email: 'example@example.com',
-        interests: [],
+        interests: ['whatever'],
         consent: true,
       };
 
@@ -1194,7 +1194,7 @@ test.cb('Should do nothing when re-adding marketing info to dashboard', (t) => {
         () => {
           t.context.clients[0].emit(
             'add-marketing-info',
-            { email: 'komninos@komninos.me', interests: [], consent: false },
+            { email: 'komninos@komninos.me', interests: ['whatever'], consent: false },
             () => {
               t.end();
             }

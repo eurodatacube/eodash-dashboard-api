@@ -132,7 +132,7 @@ export default function dashboardRepositoryTestFactory<
 
     const marketingInfo: Dashboard['marketingInfo'] = {
       email: 'a@b.co',
-      interests: [],
+      interests: ['whatever'],
       consent: true,
     };
 
