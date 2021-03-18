@@ -1,5 +1,6 @@
 import { TestInterface } from 'ava';
 
+import { Dashboard } from '../../domain/dashboard';
 import { Feature } from '../../domain/feature';
 import { DashboardNoKeys } from '../../dto/dashboard-no-keys';
 
@@ -84,7 +85,7 @@ export default function dashboardRepositoryTestFactory<
     t.is(dashboard, null);
   });
 
-  test('Should be able to edit a dashboard', async (t) => {
+  test("Should be able to edit a dashboard's title", async (t) => {
     const title = 'My dashboard';
     const features: Feature[] = [];
 
@@ -100,6 +101,51 @@ export default function dashboardRepositoryTestFactory<
     const newDashboard = await t.context.repo.get(id);
 
     t.is(newDashboard!.title, newTitle);
+  });
+
+  test("Should be able to edit a dashboard's features", async (t) => {
+    const title = 'My dashboard';
+    const features: Feature[] = [];
+
+    const { id } = await t.context.repo.add(title, features);
+
+    const newFeatures: Feature[] = [
+      { id: '1', width: 2 },
+      { id: '2', width: 4 },
+    ];
+
+    await t.context.repo.edit(
+      id,
+      async (dashboard) => ((dashboard.features = newFeatures), dashboard)
+    );
+
+    const newDashboard = await t.context.repo.get(id);
+
+    t.deepEqual(newDashboard!.features, newFeatures);
+  });
+
+  test("Should be able to edit a dashboard's marketing info", async (t) => {
+    const title = 'My dashboard';
+    const features: Feature[] = [];
+
+    const { id } = await t.context.repo.add(title, features);
+
+    const marketingInfo: Dashboard['marketingInfo'] = {
+      email: 'a@b.co',
+      interests: [],
+      consent: true,
+    };
+
+    await t.context.repo.edit(
+      id,
+      async (dashboard) => (
+        (dashboard.marketingInfo = marketingInfo), dashboard
+      )
+    );
+
+    const newDashboard = await t.context.repo.get(id);
+
+    t.deepEqual(newDashboard!.marketingInfo, marketingInfo);
   });
 
   test.cb('Should emit edit event when an edit happens', (t) => {
