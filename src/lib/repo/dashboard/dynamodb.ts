@@ -122,10 +122,12 @@ export class DynamoDBDashboardRepository
                 Key: {
                   id,
                 },
-                UpdateExpression: 'set title = :t, features=:f',
+                UpdateExpression:
+                  'set title = :t, features=:f, marketingInfo=:m',
                 ExpressionAttributeValues: {
                   ':t': newDashboard.title,
                   ':f': newDashboard.features,
+                  ':m': newDashboard.marketingInfo,
                 },
               })
               .promise()
