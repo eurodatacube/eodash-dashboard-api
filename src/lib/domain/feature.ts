@@ -1,6 +1,7 @@
 export interface Feature {
   id: string;
   width: number;
+  title: string;
   [key: string]: any;
 }
 

@@ -370,6 +370,40 @@ export class DashboardServer<
             cb({ error: true, type: ErrorType.Execution, message: msg })
           );
       });
+
+      socket.on('feature-change-title', (payload, cb) => {
+        if (typeof cb !== 'function') {
+          if (typeof cb === 'undefined') cb = () => {};
+          else return;
+        }
+
+        const { error, value } = Joi.object()
+          .keys({
+            id: Joi.string().required(),
+            newTitle: Joi.string().required(),
+          })
+          .validate(payload);
+
+        if (error) {
+          this.logger.debug(
+            `Validation for ${socket.id}'s feature-change-title call failed: ${error.message}`
+          );
+          return cb({
+            error: true,
+            type: ErrorType.Validation,
+            details: error.details,
+          });
+        }
+        this.logger.debug(
+          `Validation for ${socket.id}'s feature-change-title successful`
+        );
+
+        this.handleFeatureChangeTitle(socket, value)
+          .then(cb)
+          .catch((msg: string) =>
+            cb({ error: true, type: ErrorType.Execution, message: msg })
+          );
+      });
     });
 
     this.dashboardRepository.on(
@@ -665,6 +699,39 @@ export class DashboardServer<
 
     this.logger.debug(
       `${socket.id} removed feature with id ${featureId} from dashboard ${dashboardId}`
+    );
+  }
+
+  async handleFeatureChangeTitle(
+    socket: IOSocket,
+    { id, newTitle }: { id: string; newTitle: string }
+  ) {
+    this.logger.verbose(
+      `Received change-title call from ${socket.id} for feature ${id}`
+    );
+    if (!(await this.connectionRepository.hasPrivilege(socket.id))) {
+      this.logger.debug(
+        `${socket.id} not privileged to change feature's title`
+      );
+      throw 'User not privileged to perform this action';
+    }
+
+    const dashboardId = (await this.connectionRepository.getGroupOfConnection(
+      socket.id
+    ))!;
+
+    await this.dashboardRepository.edit(dashboardId, async (dashboard) => {
+      const index = dashboard.features.findIndex(
+        (feature) => feature.id === id
+      );
+      if (index !== -1) {
+        dashboard.features[index].title = newTitle;
+      } else throw 'Feature not found';
+      return dashboard;
+    });
+
+    this.logger.debug(
+      `${socket.id} changed feature ${id} from dashboard ${dashboardId} title to ${newTitle}`
     );
   }
 

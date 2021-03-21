@@ -110,8 +110,8 @@ export default function dashboardRepositoryTestFactory<
     const { id } = await t.context.repo.add(title, features);
 
     const newFeatures: Feature[] = [
-      { id: '1', width: 2 },
-      { id: '2', width: 4 },
+      { id: '1', width: 2, title: 'title' },
+      { id: '2', width: 4, title: 'title' },
     ];
 
     await t.context.repo.edit(
