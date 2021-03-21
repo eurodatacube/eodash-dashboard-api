@@ -1194,7 +1194,11 @@ test.cb('Should do nothing when re-adding marketing info to dashboard', (t) => {
         () => {
           t.context.clients[0].emit(
             'add-marketing-info',
-            { email: 'komninos@komninos.me', interests: ['whatever'], consent: false },
+            {
+              email: 'komninos@komninos.me',
+              interests: ['whatever'],
+              consent: false,
+            },
             () => {
               t.end();
             }
