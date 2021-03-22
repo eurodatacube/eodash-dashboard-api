@@ -186,6 +186,24 @@ If the marketing info already exists nothing happens.
 
 returns `void`.
 
+### feature-change-title
+
+Changes the title of a feature
+
+If the user does not have privilege to edit the dashboard, an error is thrown.
+
+If a feature with the provided id does not exist, nothing happens'.
+
+```ts
+// Payload
+{
+  id: string;
+  newTitle: string;
+}
+```
+
+returns `void`.
+
 ## Client events
 
 The following events are sent from the server to clients connected to a dashboard.
