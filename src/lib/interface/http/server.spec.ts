@@ -1302,6 +1302,84 @@ test.cb(
   }
 );
 
+test.cb("Should be able to change feature's map information", (t): void => {
+  t.plan(2);
+
+  const title = 'My dashboard';
+  const features: FeatureNoWidth[] = [{ id: '0', title: 'title' }];
+
+  const mapInfo = {
+    zoom: 10,
+    center: {
+      lat: 0,
+      lng: 0,
+    },
+  };
+
+  t.context.clients[0].emit(
+    'create',
+    {
+      title,
+      features,
+    },
+    () => {
+      t.context.clients[0].on('edit', (newDashboard: Dashboard) => {
+        t.deepEqual(newDashboard.features[0].mapInfo, mapInfo);
+      });
+      t.context.clients[0].emit(
+        'feature-change-map-info',
+        {
+          id: features[0].id,
+          ...mapInfo,
+        },
+        (response: any) => {
+          t.is(response?.error, undefined);
+          t.end();
+        }
+      );
+    }
+  );
+});
+
+test.cb(
+  "Should not be able to change feature's map information without editing privilege",
+  (t): void => {
+    t.plan(1);
+
+    const title = 'My dashboard';
+    const features: FeatureNoWidth[] = [{ id: '0', title: 'title' }];
+
+    const mapInfo = {
+      zoom: 10,
+      center: {
+        lat: 0,
+        lng: 0,
+      },
+    };
+
+    t.context.clients[0].emit(
+      'create',
+      {
+        title,
+        features,
+      },
+      () => {
+        t.context.clients[0].emit(
+          'feature-change-map-info',
+          {
+            id: features[0].id,
+            ...mapInfo,
+          },
+          (response: any) => {
+            t.is(response?.error, undefined);
+            t.end();
+          }
+        );
+      }
+    );
+  }
+);
+
 test.afterEach.always(async (t) => {
   await t.context.server.close();
 });

@@ -166,6 +166,7 @@ export class DashboardServer<
         // TODO: DDD violation. Move validation to domain.
         const { error, value } = Joi.object({
           id: Joi.string().required(),
+          title: Joi.string().required(),
         })
           .options({ allowUnknown: true })
           .validate(payload);
@@ -399,6 +400,46 @@ export class DashboardServer<
         );
 
         this.handleFeatureChangeTitle(socket, value)
+          .then(cb)
+          .catch((msg: string) =>
+            cb({ error: true, type: ErrorType.Execution, message: msg })
+          );
+      });
+
+      socket.on('feature-change-map-info', (payload, cb) => {
+        if (typeof cb !== 'function') {
+          if (typeof cb === 'undefined') cb = () => {};
+          else return;
+        }
+
+        const { error, value } = Joi.object()
+          .keys({
+            id: Joi.string().required(),
+            zoom: Joi.number().optional(),
+            center: Joi.object()
+              .keys({
+                lat: Joi.number().required(),
+                lng: Joi.number().required(),
+              })
+              .optional(),
+          })
+          .validate(payload);
+
+        if (error) {
+          this.logger.debug(
+            `Validation for ${socket.id}'s feature-change-map-info call failed: ${error.message}`
+          );
+          return cb({
+            error: true,
+            type: ErrorType.Validation,
+            details: error.details,
+          });
+        }
+        this.logger.debug(
+          `Validation for ${socket.id}'s feature-change-map-info successful`
+        );
+
+        this.handleFeatureChangeMapInfo(socket, value)
           .then(cb)
           .catch((msg: string) =>
             cb({ error: true, type: ErrorType.Execution, message: msg })
@@ -732,6 +773,47 @@ export class DashboardServer<
 
     this.logger.debug(
       `${socket.id} changed feature ${id} from dashboard ${dashboardId} title to ${newTitle}`
+    );
+  }
+
+  async handleFeatureChangeMapInfo(
+    socket: IOSocket,
+    mapInfo: Required<Feature['mapInfo']> & { id: string }
+  ) {
+    const { id, ...mapInfoWithoutId } = mapInfo;
+
+    this.logger.verbose(
+      `Received change-title call from ${socket.id} for feature ${id}`
+    );
+    if (!(await this.connectionRepository.hasPrivilege(socket.id))) {
+      this.logger.debug(
+        `${socket.id} not privileged to change feature's title`
+      );
+      throw 'User not privileged to perform this action';
+    }
+
+    const dashboardId = (await this.connectionRepository.getGroupOfConnection(
+      socket.id
+    ))!;
+
+    await this.dashboardRepository.edit(dashboardId, async (dashboard) => {
+      const index = dashboard.features.findIndex(
+        (feature) => feature.id === id
+      );
+      if (index !== -1) {
+        dashboard.features[index].mapInfo = mapInfoWithoutId;
+      } else throw 'Feature not found';
+      return dashboard;
+    });
+
+    this.logger.debug(
+      `${
+        socket.id
+      } changed feature ${id} from dashboard ${dashboardId} mapInfo to ${JSON.stringify(
+        mapInfoWithoutId,
+        null,
+        2
+      )}`
     );
   }
 

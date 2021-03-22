@@ -2,6 +2,13 @@ export interface Feature {
   id: string;
   width: number;
   title: string;
+  mapInfo?: {
+    zoom: number;
+    center: {
+      lat: number;
+      lng: number;
+    };
+  };
   [key: string]: any;
 }
 
