@@ -35,8 +35,9 @@ jobs:
         uses: actions/checkout@v2
 
       - name: test and push
+        env:
+          CI: true
         run: |
           IMG="eurodatacube/eodash-dashboard-api:${{ steps.get_image_tag.outputs.TAG }}"
-          docker run --network="host" "${IMG}" yarn run test || exit 1
-          docker run --network="host" "${IMG}" yarn run cov:send || exit 1
+          docker run --network="host" "${IMG}" yarn run ci || exit 1
           docker push "${IMG}"
