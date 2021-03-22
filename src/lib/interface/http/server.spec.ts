@@ -261,7 +261,7 @@ test.cb(
               'add-feature',
               {
                 id: '0',
-                title: 'title'
+                title: 'title',
               },
               (response: any) => {
                 t.is(response?.error, undefined);
@@ -302,7 +302,7 @@ test.cb(
               'add-feature',
               {
                 id: featureId,
-                title: 'title'
+                title: 'title',
               },
               () => {
                 t.context.clients[1].emit(
@@ -403,7 +403,7 @@ test.cb(
           'add-feature',
           {
             id: '0',
-            title: 'title'
+            title: 'title',
           },
           (response: any) => {
             t.is(response?.error, undefined);
@@ -436,7 +436,7 @@ test.cb(
           'add-feature',
           {
             id: featureId,
-            title: 'title'
+            title: 'title',
           },
           () => {
             t.context.clients[0].emit(
@@ -554,7 +554,7 @@ test.cb(
               'add-feature',
               {
                 id: featureId,
-                title: 'title'
+                title: 'title',
               },
               () => {
                 t.context.clients[1].emit(
