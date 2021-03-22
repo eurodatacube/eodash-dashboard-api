@@ -7,6 +7,12 @@ ENV HOST=0.0.0.0
 ENV PORT=8080
 EXPOSE 8080
 
+# Update
+RUN apt-get update -y
+
+# Install git
+RUN apt-get install -y git-all
+
 # Install Node, NPM, Yarn
 RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash
 RUN apt-get install -y nodejs
