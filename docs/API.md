@@ -192,13 +192,35 @@ Changes the title of a feature
 
 If the user does not have privilege to edit the dashboard, an error is thrown.
 
-If a feature with the provided id does not exist, nothing happens'.
+If a feature with the provided id does not exist, nothing happens.
 
 ```ts
 // Payload
 {
   id: string;
   newTitle: string;
+}
+```
+
+returns `void`.
+
+### feature-change-map-info
+
+Changes the map information of a feature
+
+If the user does not have privilege to edit the dashboard, an error is thrown.
+
+If a feature with the provided id does not exist, nothing happens.
+
+```ts
+// Payload
+{
+  id: string;
+  zoom?: string;
+  center?: {
+    lat: number;
+    lng: number;
+  }
 }
 ```
 
