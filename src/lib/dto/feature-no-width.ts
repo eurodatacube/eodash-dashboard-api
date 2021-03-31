@@ -9,5 +9,6 @@ export type FeatureNoWidth = {
     };
   };
   text?: string;
+  __generatedText__?: string
   [key: string]: any;
 };

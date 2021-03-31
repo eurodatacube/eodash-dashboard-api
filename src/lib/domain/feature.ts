@@ -10,6 +10,7 @@ export interface Feature {
     };
   };
   text?: string;
+  __generatedText__?: string
   [key: string]: any;
 }
 

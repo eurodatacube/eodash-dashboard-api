@@ -742,7 +742,7 @@ export class DashboardServer<
     ))!;
 
     if (feature.text) {
-      feature.text = xss(marked(feature.text));
+      feature.__generatedText__ = xss(marked(feature.text));
     }
 
     await this.dashboardRepository.edit(
@@ -878,7 +878,8 @@ export class DashboardServer<
         (feature) => feature.id === id
       );
       if (index !== -1) {
-        dashboard.features[index].text = xss(marked(text));
+        dashboard.features[index].text = text;
+        dashboard.features[index].__generatedText__ = xss(marked(text));
       } else throw 'Feature not found';
       return dashboard;
     });

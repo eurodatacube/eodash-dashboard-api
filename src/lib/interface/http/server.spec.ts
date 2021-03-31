@@ -1386,10 +1386,11 @@ test.cb(
 );
 
 test.cb('Should be able to add a text feature to a dashboard', (t): void => {
-  t.plan(4);
+  t.plan(6);
 
   const title = 'My dashboard';
   const features: FeatureNoWidth[] = [];
+  const text = '# markdown is supported but we do not want no xss <script>alert("dumb boi")</script> '
 
   t.context.clients[0].emit(
     'create',
@@ -1400,13 +1401,15 @@ test.cb('Should be able to add a text feature to a dashboard', (t): void => {
     () => {
       t.context.clients[0].on('edit', (dashboard: Dashboard) => {
         t.is(typeof dashboard.features[0].text, 'string');
+        t.is(dashboard.features[0].text, text, dashboard.features[0].text)
+        t.is(typeof dashboard.features[0].__generatedText__, 'string');
         t.true(
-          dashboard.features[0]?.text?.includes('<h1'),
-          dashboard.features[0]?.text
+          dashboard.features[0].__generatedText__?.includes('<h1'),
+          dashboard.features[0].__generatedText__
         );
         t.false(
-          dashboard.features[0]?.text?.includes('<script'),
-          dashboard.features[0]?.text
+          dashboard.features[0].__generatedText__?.includes('<script'),
+          dashboard.features[0].__generatedText__
         );
       });
 
@@ -1415,8 +1418,7 @@ test.cb('Should be able to add a text feature to a dashboard', (t): void => {
         {
           id: '0',
           title: 'title',
-          text:
-            '# markdown is supported but we do not want no xss <script>alert("dumb boi")</script> ',
+          text
         },
         (response: any) => {
           t.is(response?.error, undefined);
@@ -1445,12 +1447,12 @@ test.cb('Should be able to change the text of a text feature', (t): void => {
       t.context.clients[0].on('edit', (dashboard: Dashboard) => {
         t.is(typeof dashboard.features[0].text, 'string');
         t.true(
-          dashboard.features[0]?.text?.includes('<h1'),
-          dashboard.features[0]?.text
+          dashboard.features[0]?.__generatedText__?.includes('<h1'),
+          dashboard.features[0]?.__generatedText__
         );
         t.false(
-          dashboard.features[0]?.text?.includes('<script'),
-          dashboard.features[0]?.text
+          dashboard.features[0]?.__generatedText__?.includes('<script'),
+          dashboard.features[0]?.__generatedText__
         );
       });
 
