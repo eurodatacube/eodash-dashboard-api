@@ -1,12 +1,11 @@
 import http from 'http';
 
-import xss from 'xss'
 import express from 'express';
 import Joi from 'joi';
 import marked from 'marked';
 import { Server as IOServer, Socket as IOSocket } from 'socket.io';
 import { Logger } from 'winston';
-
+import xss from 'xss';
 
 import { Dashboard } from '../../domain/dashboard';
 import {
@@ -458,7 +457,7 @@ export class DashboardServer<
         const { error, value } = Joi.object()
           .keys({
             id: Joi.string().required(),
-            text: Joi.string().required()
+            text: Joi.string().required(),
           })
           .validate(payload);
 
@@ -860,16 +859,13 @@ export class DashboardServer<
 
   async handleFeatureChangeText(
     socket: IOSocket,
-    {id, text}:  { id: string, text: string }
+    { id, text }: { id: string; text: string }
   ) {
-
     this.logger.verbose(
       `Received change-text call from ${socket.id} for feature ${id}`
     );
     if (!(await this.connectionRepository.hasPrivilege(socket.id))) {
-      this.logger.debug(
-        `${socket.id} not privileged to change feature's text`
-      );
+      this.logger.debug(`${socket.id} not privileged to change feature's text`);
       throw 'User not privileged to perform this action';
     }
 
@@ -888,9 +884,7 @@ export class DashboardServer<
     });
 
     this.logger.debug(
-      `${
-        socket.id
-      } changed feature ${id} from dashboard ${dashboardId} text to ${text}`
+      `${socket.id} changed feature ${id} from dashboard ${dashboardId} text to ${text}`
     );
   }
 

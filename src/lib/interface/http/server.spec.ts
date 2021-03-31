@@ -1385,92 +1385,102 @@ test.cb(
   }
 );
 
-test.cb(
-  'Should be able to add a text feature to a dashboard',
-  (t): void => {
-    t.plan(4);
+test.cb('Should be able to add a text feature to a dashboard', (t): void => {
+  t.plan(4);
 
-    const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [];
+  const title = 'My dashboard';
+  const features: FeatureNoWidth[] = [];
 
-    t.context.clients[0].emit(
-      'create',
-      {
-        title,
-        features,
-      },
-      () => {
-            t.context.clients[0].on('edit', (dashboard: Dashboard) => {
-              t.is(typeof dashboard.features[0].text, 'string')
-              t.true(dashboard.features[0]?.text?.includes('<h1'), dashboard.features[0]?.text)
-              t.false(dashboard.features[0]?.text?.includes('<script'), dashboard.features[0]?.text)
-            })
+  t.context.clients[0].emit(
+    'create',
+    {
+      title,
+      features,
+    },
+    () => {
+      t.context.clients[0].on('edit', (dashboard: Dashboard) => {
+        t.is(typeof dashboard.features[0].text, 'string');
+        t.true(
+          dashboard.features[0]?.text?.includes('<h1'),
+          dashboard.features[0]?.text
+        );
+        t.false(
+          dashboard.features[0]?.text?.includes('<script'),
+          dashboard.features[0]?.text
+        );
+      });
 
-            t.context.clients[0].emit(
-              'add-feature',
-              {
-                id: '0',
-                title: 'title',
-                text: '# markdown is supported but we do not want no xss <script>alert("dumb boi")</script> ' 
-              },
-              (response: any) => {
-                t.is(response?.error, undefined);
-                t.end();
-              }
-            );
-          }
-    );
-  }
-);
+      t.context.clients[0].emit(
+        'add-feature',
+        {
+          id: '0',
+          title: 'title',
+          text:
+            '# markdown is supported but we do not want no xss <script>alert("dumb boi")</script> ',
+        },
+        (response: any) => {
+          t.is(response?.error, undefined);
+          t.end();
+        }
+      );
+    }
+  );
+});
 
-test.cb(
-  'Should be able to change the text of a text feature',
-  (t): void => {
-    t.plan(8);
+test.cb('Should be able to change the text of a text feature', (t): void => {
+  t.plan(8);
 
-    const title = 'My dashboard';
-    const features: FeatureNoWidth[] = [];
+  const title = 'My dashboard';
+  const features: FeatureNoWidth[] = [];
 
-    t.context.clients[0].emit(
-      'create',
-      {
-        title,
-        features,
-      },
-      () => {
-      const featureId = '0'
+  t.context.clients[0].emit(
+    'create',
+    {
+      title,
+      features,
+    },
+    () => {
+      const featureId = '0';
       // This gets called twice ;)
-            t.context.clients[0].on('edit', (dashboard: Dashboard) => {
-              t.is(typeof dashboard.features[0].text, 'string')
-              t.true(dashboard.features[0]?.text?.includes('<h1'), dashboard.features[0]?.text)
-              t.false(dashboard.features[0]?.text?.includes('<script'), dashboard.features[0]?.text)
-            })
+      t.context.clients[0].on('edit', (dashboard: Dashboard) => {
+        t.is(typeof dashboard.features[0].text, 'string');
+        t.true(
+          dashboard.features[0]?.text?.includes('<h1'),
+          dashboard.features[0]?.text
+        );
+        t.false(
+          dashboard.features[0]?.text?.includes('<script'),
+          dashboard.features[0]?.text
+        );
+      });
 
-            t.context.clients[0].emit(
-              'add-feature',
-              {
-                id: featureId,
-                title: 'title',
-                text: '# markdown is supported but we do not want no xss <script>alert("dumb boi")</script>'
-              },
-              (response: any) => {
-                t.is(response?.error, undefined);
-                t.context.clients[0].emit(
-                  'feature-change-text',
-                  {
-                    id: featureId,
-                    text: '# Some other text with another xss <script>alert("so lucky I actually wrote tests!")</script>'
-                  },
-                  (response: any) => {
-                    t.is(response?.error, undefined);
-                t.end();
-              }
-            );
-          }
-    );
-        })
-  }
-);
+      t.context.clients[0].emit(
+        'add-feature',
+        {
+          id: featureId,
+          title: 'title',
+          text:
+            '# markdown is supported but we do not want no xss <script>alert("dumb boi")</script>',
+        },
+        (response: any) => {
+          t.is(response?.error, undefined);
+          t.context.clients[0].emit(
+            'feature-change-text',
+            {
+              id: featureId,
+              text:
+                '# Some other text with another xss <script>alert("so lucky I actually wrote tests!")</script>',
+            },
+            (response: any) => {
+              t.is(response?.error, undefined);
+              t.end();
+            }
+          );
+        }
+      );
+    }
+  );
+});
 test.afterEach.always(async (t) => {
   await t.context.server.close();
 });
