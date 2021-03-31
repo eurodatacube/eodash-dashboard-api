@@ -1390,7 +1390,8 @@ test.cb('Should be able to add a text feature to a dashboard', (t): void => {
 
   const title = 'My dashboard';
   const features: FeatureNoWidth[] = [];
-  const text = '# markdown is supported but we do not want no xss <script>alert("dumb boi")</script> '
+  const text =
+    '# markdown is supported but we do not want no xss <script>alert("dumb boi")</script> ';
 
   t.context.clients[0].emit(
     'create',
@@ -1401,7 +1402,7 @@ test.cb('Should be able to add a text feature to a dashboard', (t): void => {
     () => {
       t.context.clients[0].on('edit', (dashboard: Dashboard) => {
         t.is(typeof dashboard.features[0].text, 'string');
-        t.is(dashboard.features[0].text, text, dashboard.features[0].text)
+        t.is(dashboard.features[0].text, text, dashboard.features[0].text);
         t.is(typeof dashboard.features[0].__generatedText__, 'string');
         t.true(
           dashboard.features[0].__generatedText__?.includes('<h1'),
@@ -1418,7 +1419,7 @@ test.cb('Should be able to add a text feature to a dashboard', (t): void => {
         {
           id: '0',
           title: 'title',
-          text
+          text,
         },
         (response: any) => {
           t.is(response?.error, undefined);
