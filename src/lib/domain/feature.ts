@@ -9,6 +9,7 @@ export interface Feature {
       lng: number;
     };
   };
+  text?: string;
   [key: string]: any;
 }
 

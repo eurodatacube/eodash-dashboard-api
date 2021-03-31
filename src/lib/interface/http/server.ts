@@ -1,9 +1,12 @@
 import http from 'http';
 
+import xss from 'xss'
 import express from 'express';
 import Joi from 'joi';
+import marked from 'marked';
 import { Server as IOServer, Socket as IOSocket } from 'socket.io';
 import { Logger } from 'winston';
+
 
 import { Dashboard } from '../../domain/dashboard';
 import {
@@ -445,6 +448,40 @@ export class DashboardServer<
             cb({ error: true, type: ErrorType.Execution, message: msg })
           );
       });
+
+      socket.on('feature-change-text', (payload, cb) => {
+        if (typeof cb !== 'function') {
+          if (typeof cb === 'undefined') cb = () => {};
+          else return;
+        }
+
+        const { error, value } = Joi.object()
+          .keys({
+            id: Joi.string().required(),
+            text: Joi.string().required()
+          })
+          .validate(payload);
+
+        if (error) {
+          this.logger.debug(
+            `Validation for ${socket.id}'s feature-change-text call failed: ${error.message}`
+          );
+          return cb({
+            error: true,
+            type: ErrorType.Validation,
+            details: error.details,
+          });
+        }
+        this.logger.debug(
+          `Validation for ${socket.id}'s feature-change-text successful`
+        );
+
+        this.handleFeatureChangeText(socket, value)
+          .then(cb)
+          .catch((msg: string) =>
+            cb({ error: true, type: ErrorType.Execution, message: msg })
+          );
+      });
     });
 
     this.dashboardRepository.on(
@@ -705,6 +742,10 @@ export class DashboardServer<
       socket.id
     ))!;
 
+    if (feature.text) {
+      feature.text = xss(marked(feature.text));
+    }
+
     await this.dashboardRepository.edit(
       dashboardId,
       async (dashboard) => (dashboard.features.push(feature), dashboard)
@@ -783,11 +824,11 @@ export class DashboardServer<
     const { id, ...mapInfoWithoutId } = mapInfo;
 
     this.logger.verbose(
-      `Received change-title call from ${socket.id} for feature ${id}`
+      `Received change-map-info call from ${socket.id} for feature ${id}`
     );
     if (!(await this.connectionRepository.hasPrivilege(socket.id))) {
       this.logger.debug(
-        `${socket.id} not privileged to change feature's title`
+        `${socket.id} not privileged to change feature's map info`
       );
       throw 'User not privileged to perform this action';
     }
@@ -814,6 +855,42 @@ export class DashboardServer<
         null,
         2
       )}`
+    );
+  }
+
+  async handleFeatureChangeText(
+    socket: IOSocket,
+    {id, text}:  { id: string, text: string }
+  ) {
+
+    this.logger.verbose(
+      `Received change-text call from ${socket.id} for feature ${id}`
+    );
+    if (!(await this.connectionRepository.hasPrivilege(socket.id))) {
+      this.logger.debug(
+        `${socket.id} not privileged to change feature's text`
+      );
+      throw 'User not privileged to perform this action';
+    }
+
+    const dashboardId = (await this.connectionRepository.getGroupOfConnection(
+      socket.id
+    ))!;
+
+    await this.dashboardRepository.edit(dashboardId, async (dashboard) => {
+      const index = dashboard.features.findIndex(
+        (feature) => feature.id === id
+      );
+      if (index !== -1) {
+        dashboard.features[index].text = xss(marked(text));
+      } else throw 'Feature not found';
+      return dashboard;
+    });
+
+    this.logger.debug(
+      `${
+        socket.id
+      } changed feature ${id} from dashboard ${dashboardId} text to ${text}`
     );
   }
 

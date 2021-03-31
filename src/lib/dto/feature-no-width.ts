@@ -8,5 +8,6 @@ export type FeatureNoWidth = {
       lng: number;
     };
   };
+  text?: string;
   [key: string]: any;
 };
