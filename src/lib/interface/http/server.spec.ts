@@ -1436,6 +1436,11 @@ test.cb('Should be able to change the text of a text feature', (t): void => {
   const title = 'My dashboard';
   const features: FeatureNoWidth[] = [];
 
+  const text =
+    '# markdown is supported but we do not want no xss <script>alert("dumb boi")</script>';
+  const newText =
+    '# Some other text with another xss <script>alert("so lucky I actually wrote tests!")</script>';
+
   t.context.clients[0].emit(
     'create',
     {
@@ -1445,8 +1450,14 @@ test.cb('Should be able to change the text of a text feature', (t): void => {
     () => {
       const featureId = '0';
       // This gets called twice ;)
+
+      let triggered = false;
       t.context.clients[0].on('edit', (dashboard: Dashboard) => {
-        t.is(typeof dashboard.features[0].text, 'string');
+        t.is(
+          dashboard.features[0].text,
+          !triggered ? text : newText,
+          dashboard.features[0].text
+        );
         t.true(
           dashboard.features[0]?.__generatedText__?.includes('<h1'),
           dashboard.features[0]?.__generatedText__
@@ -1455,6 +1466,8 @@ test.cb('Should be able to change the text of a text feature', (t): void => {
           dashboard.features[0]?.__generatedText__?.includes('<script'),
           dashboard.features[0]?.__generatedText__
         );
+
+        triggered = true;
       });
 
       t.context.clients[0].emit(
@@ -1462,8 +1475,7 @@ test.cb('Should be able to change the text of a text feature', (t): void => {
         {
           id: featureId,
           title: 'title',
-          text:
-            '# markdown is supported but we do not want no xss <script>alert("dumb boi")</script>',
+          text,
         },
         (response: any) => {
           t.is(response?.error, undefined);
@@ -1471,8 +1483,7 @@ test.cb('Should be able to change the text of a text feature', (t): void => {
             'feature-change-text',
             {
               id: featureId,
-              text:
-                '# Some other text with another xss <script>alert("so lucky I actually wrote tests!")</script>',
+              text: newText,
             },
             (response: any) => {
               t.is(response?.error, undefined);
