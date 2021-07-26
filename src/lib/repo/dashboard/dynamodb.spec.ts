@@ -25,7 +25,7 @@ dashboardRepositoryTestFactory(
     );
 
     return new DynamoDBDashboardRepository(
-      'dashboard',
+      'tableName',
       8,
       new AWS.DynamoDB(),
       new AWS.DynamoDB.DocumentClient()

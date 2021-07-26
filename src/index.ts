@@ -44,8 +44,9 @@ if (process.env.NODE_ENV === 'production') {
 
   const awsAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
   const awsSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+  const tableName = process.env.TABLE_NAME;
 
-  if (awsAccessKeyId && awsSecretAccessKey) {
+  if (awsAccessKeyId && awsSecretAccessKey && tableName) {
     AWS.config.update(
       {
         region: 'eu-central-1',
@@ -56,7 +57,7 @@ if (process.env.NODE_ENV === 'production') {
     );
 
     dashboardRepository = new DynamoDBDashboardRepository(
-      'dashboard',
+      tableName,
       8,
       new AWS.DynamoDB(),
       new AWS.DynamoDB.DocumentClient()
