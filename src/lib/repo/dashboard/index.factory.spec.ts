@@ -131,9 +131,7 @@ export default function dashboardRepositoryTestFactory<
     const { id } = await t.context.repo.add(title, features);
 
     const marketingInfo: Dashboard['marketingInfo'] = {
-      email: 'a@b.co',
       interests: ['whatever'],
-      consent: true,
     };
 
     await t.context.repo.edit(

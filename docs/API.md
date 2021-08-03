@@ -175,12 +175,12 @@ If the user does not have privilege to edit the dashboard, an error is thrown.
 
 If the marketing info already exists nothing happens.
 
-```ts
+```diff
 // Payload
 {
-  email: string;
+- email: string; // deprecated and disabled from v0.4.5 onwards
   interests: string[];
-  consent: boolean;
+- consent: boolean; // deprecated and disabled from v0.4.5 onwards
 }
 ```
 

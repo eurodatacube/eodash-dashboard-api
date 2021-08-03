@@ -1158,9 +1158,7 @@ test.cb('Should be able to add marketing info to dashboard', (t) => {
     { title: 'My dashboard', features: [] },
     () => {
       const marketingInfo = {
-        email: 'example@example.com',
         interests: ['whatever'],
-        consent: true,
       };
 
       t.context.clients[0].on('edit', (dto: DashboardDto) => {
@@ -1190,7 +1188,7 @@ test.cb(
         t.context.clients[1].emit('listen', { id }, () => {
           t.context.clients[1].emit(
             'add-marketing-info',
-            { email: 'example@example.com', interests: [], consent: true },
+            { interests: [] },
             (response: any) => {
               t.is(response?.error, true);
               t.end();
@@ -1210,9 +1208,7 @@ test.cb('Should do nothing when re-adding marketing info to dashboard', (t) => {
     { title: 'My dashboard', features: [] },
     () => {
       const originalMarketingInfo = {
-        email: 'example@example.com',
         interests: ['whatever'],
-        consent: true,
       };
 
       // This gets called twice ;)
@@ -1227,9 +1223,7 @@ test.cb('Should do nothing when re-adding marketing info to dashboard', (t) => {
           t.context.clients[0].emit(
             'add-marketing-info',
             {
-              email: 'komninos@komninos.me',
               interests: ['whatever'],
-              consent: false,
             },
             () => {
               t.end();
