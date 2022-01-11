@@ -29,7 +29,7 @@ export enum ErrorType {
 export class DashboardServer<
   DR extends DashboardRepository,
   CR extends ConnectionRepository
-  > {
+> {
   private readonly app = express();
   private readonly http = new http.Server(this.app);
   private readonly io = new IOServer(this.http);
