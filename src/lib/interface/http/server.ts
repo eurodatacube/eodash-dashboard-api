@@ -29,7 +29,7 @@ export enum ErrorType {
 export class DashboardServer<
   DR extends DashboardRepository,
   CR extends ConnectionRepository
-> {
+  > {
   private readonly app = express();
   private readonly http = new http.Server(this.app);
   private readonly io = new IOServer(this.http);
@@ -42,6 +42,34 @@ export class DashboardServer<
     private readonly logger: Logger
   ) {
     this.app.set('port', port);
+
+    this.app.get('/get', async (req, res) => {
+      const id = req.query.id;
+      if (!id) {
+        res.status(400).send({
+          status: 400,
+          error: 'Missing parameter: id'
+        });
+        return;
+      }
+      if (typeof id !== 'string') {
+        res.status(400).send({
+          status: 400,
+          error: 'Parameter id must be of type string'
+        });
+        return;
+      }
+
+      const dashboard = await this.dashboardRepository.get(id);
+      if (!dashboard) {
+        res.status(404).send({
+          status: 404,
+          error: `Dashboard with id ${id} not found`
+        });
+      } else {
+        res.send(dashboard);
+      }
+    });
 
     this.io.on('connection', (socket: IOSocket) => {
       this.logger.verbose(`New connection with id ${socket.id}`);
