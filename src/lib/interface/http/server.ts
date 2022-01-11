@@ -48,14 +48,14 @@ export class DashboardServer<
       if (!id) {
         res.status(400).send({
           status: 400,
-          error: 'Missing parameter: id'
+          error: 'Missing parameter: id',
         });
         return;
       }
       if (typeof id !== 'string') {
         res.status(400).send({
           status: 400,
-          error: 'Parameter id must be of type string'
+          error: 'Parameter id must be of type string',
         });
         return;
       }
@@ -64,7 +64,7 @@ export class DashboardServer<
       if (!dashboard) {
         res.status(404).send({
           status: 404,
-          error: `Dashboard with id ${id} not found`
+          error: `Dashboard with id ${id} not found`,
         });
       } else {
         res.send(dashboard);
