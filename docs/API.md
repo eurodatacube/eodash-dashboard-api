@@ -221,6 +221,8 @@ If a feature with the provided id does not exist, nothing happens.
     lat: number;
     lng: number;
   }
+  dataLayerTime?: string;
+  compareLayerTime?: string;
 }
 ```
 
