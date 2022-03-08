@@ -451,7 +451,7 @@ export class DashboardServer<
               })
               .optional(),
             dataLayerTime: Joi.string().optional(),
-            compareLayerTime: Joi.number().optional(),
+            compareLayerTime: Joi.string().optional(),
           })
           .validate(payload);
 
