@@ -8,7 +8,7 @@ export interface Feature {
       lat: number;
       lng: number;
     };
-    dataLayerTime: string;
+    dataLayerTime?: string;
     compareLayerTime?: string;
   };
   text?: string;
