@@ -7,6 +7,8 @@ export type FeatureNoWidth = {
       lat: number;
       lng: number;
     };
+    dataLayerTime?: string;
+    compareLayerTime?: string;
   };
   text?: string;
   __generatedText__?: string;
