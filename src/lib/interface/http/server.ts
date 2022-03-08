@@ -450,7 +450,7 @@ export class DashboardServer<
                 lng: Joi.number().required(),
               })
               .optional(),
-            dataLayerTime: Joi.string().required(),
+            dataLayerTime: Joi.string().optional(),
             compareLayerTime: Joi.number().optional(),
           })
           .validate(payload);
