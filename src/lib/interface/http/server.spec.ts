@@ -1313,6 +1313,8 @@ test.cb("Should be able to change feature's map information", (t): void => {
       lat: 0,
       lng: 0,
     },
+    dataLayerTime: '2020-01-22',
+    compareLayerTime: '2021-12-22',
   };
 
   t.context.clients[0].emit(
@@ -1354,6 +1356,8 @@ test.cb(
         lat: 0,
         lng: 0,
       },
+      dataLayerTime: '2020-01-22',
+      compareLayerTime: '2021-12-22',
     };
 
     t.context.clients[0].emit(
