@@ -3,11 +3,15 @@ export interface Feature {
   width: number;
   title: string;
   mapInfo?: {
-    zoom: number;
-    center: {
+    zoom?: number;
+    center?: {
       lat: number;
       lng: number;
     };
+    direction?: array;
+    position?: array;
+    right?: array;
+    up?: array;
     dataLayerTime?: string;
     compareLayerTime?: string;
   };
