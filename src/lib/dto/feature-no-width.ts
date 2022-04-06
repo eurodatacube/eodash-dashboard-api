@@ -7,10 +7,10 @@ export type FeatureNoWidth = {
       lat: number;
       lng: number;
     };
-    direction?: array;
-    position?: array;
-    right?: array;
-    up?: array;
+    direction?: number[];
+    position?: number[];
+    right?: number[];
+    up?: number[];
     dataLayerTime?: string;
     compareLayerTime?: string;
   };
