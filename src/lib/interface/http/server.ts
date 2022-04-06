@@ -450,6 +450,10 @@ export class DashboardServer<
                 lng: Joi.number().required(),
               })
               .optional(),
+            direction: Joi.array().items(Joi.number()).length(3).optional(),
+            position: Joi.array().items(Joi.number()).length(3).optional(),
+            right: Joi.array().items(Joi.number()).length(3).optional(),
+            up: Joi.array().items(Joi.number()).length(3).optional(),
             dataLayerTime: Joi.string().optional(),
             compareLayerTime: Joi.string().optional(),
           })
