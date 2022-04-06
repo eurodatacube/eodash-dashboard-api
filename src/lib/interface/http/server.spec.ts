@@ -1360,6 +1360,10 @@ test.cb(
         lat: 0,
         lng: 0,
       },
+      direction: [1.2, -2.3, 3.4],
+      position: [1.2, -2.3, 3.4],
+      right: [1.2, -2.3, 3.4],
+      up: [1.2, -2.3, 3.4],
       dataLayerTime: '2020-01-22',
       compareLayerTime: '2021-12-22',
     };

@@ -29,7 +29,7 @@ export enum ErrorType {
 export class DashboardServer<
   DR extends DashboardRepository,
   CR extends ConnectionRepository
-> {
+  > {
   private readonly app = express();
   private readonly http = new http.Server(this.app);
   private readonly io = new IOServer(this.http);
@@ -85,7 +85,7 @@ export class DashboardServer<
 
       socket.on('listen', (payload, cb) => {
         if (typeof cb !== 'function') {
-          if (typeof cb === 'undefined') cb = () => {};
+          if (typeof cb === 'undefined') cb = () => { };
           else return;
         }
 
@@ -117,7 +117,7 @@ export class DashboardServer<
 
       socket.on('create', (payload, cb) => {
         if (typeof cb !== 'function') {
-          if (typeof cb === 'undefined') cb = () => {};
+          if (typeof cb === 'undefined') cb = () => { };
           else return;
         }
 
@@ -160,7 +160,7 @@ export class DashboardServer<
 
       socket.on('change-title', (payload, cb) => {
         if (typeof cb !== 'function') {
-          if (typeof cb === 'undefined') cb = () => {};
+          if (typeof cb === 'undefined') cb = () => { };
           else return;
         }
 
@@ -189,7 +189,7 @@ export class DashboardServer<
 
       socket.on('add-feature', (payload, cb) => {
         if (typeof cb !== 'function') {
-          if (typeof cb === 'undefined') cb = () => {};
+          if (typeof cb === 'undefined') cb = () => { };
           else return;
         }
 
@@ -224,7 +224,7 @@ export class DashboardServer<
 
       socket.on('remove-feature', (payload, cb) => {
         if (typeof cb !== 'function') {
-          if (typeof cb === 'undefined') cb = () => {};
+          if (typeof cb === 'undefined') cb = () => { };
           else return;
         }
 
@@ -253,7 +253,7 @@ export class DashboardServer<
 
       socket.on('feature-move-up', (payload, cb) => {
         if (typeof cb !== 'function') {
-          if (typeof cb === 'undefined') cb = () => {};
+          if (typeof cb === 'undefined') cb = () => { };
           else return;
         }
 
@@ -282,7 +282,7 @@ export class DashboardServer<
 
       socket.on('feature-move-down', (payload, cb) => {
         if (typeof cb !== 'function') {
-          if (typeof cb === 'undefined') cb = () => {};
+          if (typeof cb === 'undefined') cb = () => { };
           else return;
         }
 
@@ -311,7 +311,7 @@ export class DashboardServer<
 
       socket.on('feature-resize-shrink', (payload, cb) => {
         if (typeof cb !== 'function') {
-          if (typeof cb === 'undefined') cb = () => {};
+          if (typeof cb === 'undefined') cb = () => { };
           else return;
         }
 
@@ -340,7 +340,7 @@ export class DashboardServer<
 
       socket.on('feature-resize-expand', (payload, cb) => {
         if (typeof cb !== 'function') {
-          if (typeof cb === 'undefined') cb = () => {};
+          if (typeof cb === 'undefined') cb = () => { };
           else return;
         }
 
@@ -369,7 +369,7 @@ export class DashboardServer<
 
       socket.on('add-marketing-info', (payload, cb) => {
         if (typeof cb !== 'function') {
-          if (typeof cb === 'undefined') cb = () => {};
+          if (typeof cb === 'undefined') cb = () => { };
           else return;
         }
 
@@ -402,7 +402,7 @@ export class DashboardServer<
 
       socket.on('feature-change-title', (payload, cb) => {
         if (typeof cb !== 'function') {
-          if (typeof cb === 'undefined') cb = () => {};
+          if (typeof cb === 'undefined') cb = () => { };
           else return;
         }
 
@@ -436,7 +436,7 @@ export class DashboardServer<
 
       socket.on('feature-change-map-info', (payload, cb) => {
         if (typeof cb !== 'function') {
-          if (typeof cb === 'undefined') cb = () => {};
+          if (typeof cb === 'undefined') cb = () => { };
           else return;
         }
 
@@ -450,6 +450,10 @@ export class DashboardServer<
                 lng: Joi.number().required(),
               })
               .optional(),
+            direction: Joi.array().items(Joi.number()).length(3).optional(),
+            position: Joi.array().items(Joi.number()).length(3).optional(),
+            right: Joi.array().items(Joi.number()).length(3).optional(),
+            up: Joi.array().items(Joi.number()).length(3).optional(),
             dataLayerTime: Joi.string().optional(),
             compareLayerTime: Joi.string().optional(),
           })
@@ -478,7 +482,7 @@ export class DashboardServer<
 
       socket.on('feature-change-text', (payload, cb) => {
         if (typeof cb !== 'function') {
-          if (typeof cb === 'undefined') cb = () => {};
+          if (typeof cb === 'undefined') cb = () => { };
           else return;
         }
 
@@ -875,8 +879,7 @@ export class DashboardServer<
     });
 
     this.logger.debug(
-      `${
-        socket.id
+      `${socket.id
       } changed feature ${id} from dashboard ${dashboardId} mapInfo to ${JSON.stringify(
         mapInfoWithoutId,
         null,
